@@ -65,10 +65,15 @@ public class PlayerController : MonoBehaviour
     public float grappleReelSpeed = 8f;
     public float grappleSwingAirControl = 20f;
     public float grappleCooldown = 0.25f;
+    public bool requireIlluminatedGrapplePoints = false;
     public LayerMask grappleBlockerLayer;
     public LineRenderer grappleLine;
     public int grappleLineSegments = 18;
     public float ropeSag = 0.75f;
+    public float grappleLineWidth = 0.06f;
+    public Color grappleLineColor = new Color(1f, 0.95f, 0.65f, 0.95f);
+    public float grappleDetachInertiaMultiplier = 1.12f;
+    public float grappleDetachMinHorizontalSpeed = 4.5f;
     private bool isGrappling;
     private bool grappleHeld;
     private float grappleCooldownTimer;
@@ -118,6 +123,7 @@ public class PlayerController : MonoBehaviour
         grappleJoint.maxDistanceOnly = true;
         grappleJoint.enableCollision = false;
         grappleJoint.enabled = false;
+        EnsureGrappleLine();
 
         if (capsuleCollider != null)
         {
@@ -193,6 +199,9 @@ public class PlayerController : MonoBehaviour
     {
         if (value.isPressed)
         {
+            if (isGrappling)
+                DetachFromGrappleByJump();
+
             jumpBufferCounter = jumpBufferTime;
             isGlideHeld = true;
         }
@@ -226,8 +235,6 @@ public class PlayerController : MonoBehaviour
         grappleHeld = value.isPressed;
         if (value.isPressed)
             TryStartGrapple();
-        else
-            StopGrapple();
     }
 
     public void OnLantern(InputValue value)
@@ -254,7 +261,11 @@ public class PlayerController : MonoBehaviour
         moveInput = new Vector2(horizontal, vertical);
 
         if (Keyboard.current.spaceKey.wasPressedThisFrame || Keyboard.current.wKey.wasPressedThisFrame || Keyboard.current.upArrowKey.wasPressedThisFrame)
+        {
+            if (isGrappling)
+                DetachFromGrappleByJump();
             jumpBufferCounter = jumpBufferTime;
+        }
 
         if ((Keyboard.current.spaceKey.wasReleasedThisFrame || Keyboard.current.wKey.wasReleasedThisFrame || Keyboard.current.upArrowKey.wasReleasedThisFrame) && rb.linearVelocity.y > 0f)
             rb.linearVelocity = new Vector2(rb.linearVelocity.x, rb.linearVelocity.y * 0.5f);
@@ -265,16 +276,16 @@ public class PlayerController : MonoBehaviour
         if (Keyboard.current.leftCtrlKey.wasPressedThisFrame || Keyboard.current.cKey.wasPressedThisFrame)
             TryStartSlide();
 
-        if (Keyboard.current.eKey.wasPressedThisFrame)
+        bool grapplePressed = Keyboard.current.eKey.wasPressedThisFrame || Keyboard.current.qKey.wasPressedThisFrame;
+        if (grapplePressed || (Mouse.current != null && Mouse.current.rightButton.wasPressedThisFrame))
         {
             grappleHeld = true;
             TryStartGrapple();
         }
-        if (Keyboard.current.eKey.wasReleasedThisFrame)
-        {
+
+        bool grappleReleased = Keyboard.current.eKey.wasReleasedThisFrame || Keyboard.current.qKey.wasReleasedThisFrame;
+        if (grappleReleased || (Mouse.current != null && Mouse.current.rightButton.wasReleasedThisFrame))
             grappleHeld = false;
-            StopGrapple();
-        }
 
         if (Keyboard.current.fKey.wasPressedThisFrame)
             ToggleLantern();
@@ -412,7 +423,7 @@ public class PlayerController : MonoBehaviour
             return;
         }
 
-        if (!grappleHeld || !grappleTarget.IsIlluminated)
+        if (requireIlluminatedGrapplePoints && !grappleTarget.IsIlluminated)
         {
             StopGrapple();
             return;
@@ -517,7 +528,7 @@ public class PlayerController : MonoBehaviour
 
     void TryStartGrapple()
     {
-        if (grappleCooldownTimer > 0f || isGrounded || isDashing || isSliding)
+        if (grappleCooldownTimer > 0f || isDashing || isSliding)
             return;
 
         LightGrapplePoint nearest = null;
@@ -526,7 +537,10 @@ public class PlayerController : MonoBehaviour
 
         foreach (LightGrapplePoint point in LightGrapplePoint.ActivePoints)
         {
-            if (point == null || !point.IsIlluminated)
+            if (point == null)
+                continue;
+
+            if (requireIlluminatedGrapplePoints && !point.IsIlluminated)
                 continue;
 
             float distance = Vector2.Distance(origin, point.transform.position);
@@ -575,6 +589,22 @@ public class PlayerController : MonoBehaviour
         UpdateGrappleLine(false);
     }
 
+    void DetachFromGrappleByJump()
+    {
+        if (!isGrappling)
+            return;
+
+        Vector2 releaseVelocity = rb.linearVelocity;
+        if (Mathf.Abs(releaseVelocity.x) < grappleDetachMinHorizontalSpeed)
+        {
+            float dir = facingRight ? 1f : -1f;
+            releaseVelocity.x = dir * grappleDetachMinHorizontalSpeed;
+        }
+
+        StopGrapple();
+        rb.linearVelocity = new Vector2(releaseVelocity.x * grappleDetachInertiaMultiplier, Mathf.Max(releaseVelocity.y, jumpForce * 0.55f));
+    }
+
     void UpdateGrappleLine(bool show)
     {
         if (grappleLine == null)
@@ -601,6 +631,39 @@ public class PlayerController : MonoBehaviour
             Vector3 point = Vector3.Lerp(a, b, t);
             grappleLine.SetPosition(i, point);
         }
+    }
+
+    void EnsureGrappleLine()
+    {
+        if (grappleLine != null)
+        {
+            ConfigureGrappleLine(grappleLine);
+            return;
+        }
+
+        GameObject ropeObject = new GameObject("GrappleLine");
+        ropeObject.transform.SetParent(transform);
+        ropeObject.transform.localPosition = Vector3.zero;
+        ropeObject.transform.localRotation = Quaternion.identity;
+        grappleLine = ropeObject.AddComponent<LineRenderer>();
+        ConfigureGrappleLine(grappleLine);
+    }
+
+    void ConfigureGrappleLine(LineRenderer line)
+    {
+        line.enabled = false;
+        line.useWorldSpace = true;
+        line.widthMultiplier = grappleLineWidth;
+        line.positionCount = Mathf.Max(2, grappleLineSegments);
+        line.numCapVertices = 4;
+        line.numCornerVertices = 2;
+        line.sortingOrder = 20;
+        line.startColor = grappleLineColor;
+        line.endColor = grappleLineColor;
+
+        Shader lineShader = Shader.Find("Sprites/Default");
+        if (line.material == null && lineShader != null)
+            line.material = new Material(lineShader);
     }
 
     void ToggleLantern()

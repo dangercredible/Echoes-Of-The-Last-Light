@@ -2,6 +2,7 @@ using UnityEngine;
 
 public class DarknessSpreadController : MonoBehaviour
 {
+    private static Sprite cachedSquareSprite;
     [Header("References")]
     public Transform player;
     public PlayerController playerController;
@@ -100,9 +101,23 @@ public class DarknessSpreadController : MonoBehaviour
         darknessVisual = visualObject.AddComponent<SpriteRenderer>();
         darknessVisual.sortingOrder = -10;
 
-        Sprite square = Resources.GetBuiltinResource<Sprite>("UI/Skin/Background.psd");
-        darknessVisual.sprite = square;
+        darknessVisual.sprite = GetOrCreateSquareSprite();
         darknessVisual.color = fastDarknessColor;
+    }
+
+    Sprite GetOrCreateSquareSprite()
+    {
+        if (cachedSquareSprite != null)
+            return cachedSquareSprite;
+
+        Texture2D tex = new Texture2D(1, 1, TextureFormat.RGBA32, false);
+        tex.name = "DarknessSquare";
+        tex.SetPixel(0, 0, Color.white);
+        tex.Apply();
+        tex.wrapMode = TextureWrapMode.Clamp;
+        tex.filterMode = FilterMode.Bilinear;
+        cachedSquareSprite = Sprite.Create(tex, new Rect(0f, 0f, 1f, 1f), new Vector2(0.5f, 0.5f), 1f);
+        return cachedSquareSprite;
     }
 
     void UpdateDarknessVisual(bool lanternOn)

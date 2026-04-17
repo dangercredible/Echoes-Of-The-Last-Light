@@ -669,15 +669,16 @@ MonoBehaviour:
   wallJumpMoveLockTime: 0.15
   wallCoyoteTime: 0.12
   wallStickTime: 0.15
-  grappleRange: 10
+  grappleRange: 16
   grappleMinRopeLength: 1.5
   grappleMaxRopeLength: 12
   grappleReelSpeed: 8
   grappleSwingAirControl: 20
   grappleCooldown: 0.25
+  requireIlluminatedGrapplePoints: 0
   grappleBlockerLayer:
     serializedVersion: 2
-    m_Bits: 320
+    m_Bits: 0
   grappleLine: {fileID: 0}
   grappleLineSegments: 18
   ropeSag: 0.75
@@ -1454,8 +1455,8 @@ MonoBehaviour:
   visual: {fileID: 910000043}
   startsEnabled: 0
   staysEnabledAfterFirstLight: 0
-  enabledColor: {r: 1, g: 1, b: 1, a: 1}
-  disabledColor: {r: 1, g: 1, b: 1, a: 0.35}
+  enabledColor: {r: 1, g: 0.95, b: 0.5, a: 1}
+  disabledColor: {r: 0.2, g: 0.2, b: 0.3, a: 0.22}
 --- !u!1 &910000051
 GameObject:
   m_ObjectHideFlags: 0
@@ -1611,8 +1612,8 @@ MonoBehaviour:
   visual: {fileID: 910000053}
   startsEnabled: 0
   staysEnabledAfterFirstLight: 1
-  enabledColor: {r: 1, g: 1, b: 1, a: 1}
-  disabledColor: {r: 1, g: 1, b: 1, a: 0.35}
+  enabledColor: {r: 1, g: 0.95, b: 0.5, a: 1}
+  disabledColor: {r: 0.2, g: 0.2, b: 0.3, a: 0.22}
 --- !u!1 &910000061
 GameObject:
   m_ObjectHideFlags: 0

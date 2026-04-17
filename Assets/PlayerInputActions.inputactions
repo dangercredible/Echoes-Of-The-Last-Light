@@ -139,6 +139,17 @@
                 },
                 {
                     "name": "",
+                    "id": "d7ab8eb4-c71c-4e55-8d10-b4f1a4c1f3ca",
+                    "path": "<Keyboard>/w",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Jump",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
                     "id": "2ecf30f8-a27d-48a3-a43f-22d6d1630e95",
                     "path": "<Keyboard>/leftShift",
                     "interactions": "",
@@ -207,6 +218,28 @@
                     "name": "",
                     "id": "f8f3229f-66fc-48f3-b255-0a8428e6cb46",
                     "path": "<Keyboard>/e",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Grapple",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "5f2fe5e2-9ddb-4c38-8cb8-11f8b78ab941",
+                    "path": "<Keyboard>/q",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Grapple",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "8fd30508-20fc-4760-b94b-048f51257e50",
+                    "path": "<Mouse>/rightButton",
                     "interactions": "",
                     "processors": "",
                     "groups": "",

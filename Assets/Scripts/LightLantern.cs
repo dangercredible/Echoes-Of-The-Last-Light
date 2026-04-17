@@ -39,6 +39,8 @@ public class LightLantern : MonoBehaviour
             return;
 
         Collider2D[] hits = Physics2D.OverlapCircleAll(transform.position, lightRadius, affectedLayers);
+        if (hits.Length == 0)
+            hits = Physics2D.OverlapCircleAll(transform.position, lightRadius);
         HashSet<ILightReactive> currentFrame = new HashSet<ILightReactive>();
 
         for (int i = 0; i < hits.Length; i++)
@@ -89,6 +91,8 @@ public class LightLantern : MonoBehaviour
 
         if (!enabledState)
             ClearLitTargets();
+        else
+            IlluminateInRange();
 
         if (auraVisual != null)
             auraVisual.gameObject.SetActive(enabledState);
@@ -130,6 +134,26 @@ public class LightLantern : MonoBehaviour
         {
             float pulse = 1f + Mathf.Sin(Time.time * auraPulseSpeed) * auraPulseAmount;
             auraVisual.localScale = auraBaseScale * pulse;
+        }
+    }
+
+    void IlluminateInRange()
+    {
+        Collider2D[] hits = Physics2D.OverlapCircleAll(transform.position, lightRadius, affectedLayers);
+        if (hits.Length == 0)
+            hits = Physics2D.OverlapCircleAll(transform.position, lightRadius);
+
+        for (int i = 0; i < hits.Length; i++)
+        {
+            MonoBehaviour[] behaviours = hits[i].GetComponents<MonoBehaviour>();
+            for (int b = 0; b < behaviours.Length; b++)
+            {
+                if (behaviours[b] is ILightReactive reactive)
+                {
+                    reactive.SetIlluminated(true);
+                    litTargets.Add(reactive);
+                }
+            }
         }
     }
 }
