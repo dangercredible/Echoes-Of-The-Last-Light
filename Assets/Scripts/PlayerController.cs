@@ -35,15 +35,18 @@ public class PlayerController : MonoBehaviour
     [Header("Glide")]
     public float glideGravity = 0.35f;
     public float glideMaxFallSpeed = -2.5f;
+    public float maxGlideStamina = 5f;
+    public float glideStaminaRecoveryRate = 1.5f;
     private bool isGlideHeld;
     private bool isGliding;
+    private float currentGlideStamina;
 
     [Header("Wall Jump")]
     public LayerMask wallLayer;
     public float wallCheckDistance = 0.1f;
     public float wallSlideFallSpeed = -2.5f;
     public float wallJumpHorizontalForce = 11f;
-    public float wallJumpVerticalForce = 16f;
+    public float wallJumpVerticalForce = 9f;
     public float wallJumpMoveLockTime = 0.15f;
     public float wallCoyoteTime = 0.12f;
     public float wallStickTime = 0.15f;
@@ -125,6 +128,8 @@ public class PlayerController : MonoBehaviour
         wallFilter = new ContactFilter2D();
         wallFilter.SetLayerMask(wallLayer);
         wallFilter.useTriggers = false;
+
+        currentGlideStamina = maxGlideStamina;
     }
 
     void Update()
@@ -287,11 +292,14 @@ public class PlayerController : MonoBehaviour
             jumpsRemaining = maxJumps;
             canDash = true;
             isGliding = false;
+            currentGlideStamina = Mathf.Min(maxGlideStamina, currentGlideStamina + glideStaminaRecoveryRate * Time.deltaTime);
             StopGrapple();
         }
         else
         {
             coyoteTimeCounter -= Time.deltaTime;
+            if (!isGliding)
+                currentGlideStamina = Mathf.Min(maxGlideStamina, currentGlideStamina + (glideStaminaRecoveryRate * 0.35f) * Time.deltaTime);
         }
     }
 
@@ -415,10 +423,11 @@ public class PlayerController : MonoBehaviour
 
     void UpdateGlideState()
     {
-        isGliding = !isGrounded && !isDashing && !isSliding && !isGrappling && isGlideHeld && rb.linearVelocity.y < 0f;
+        isGliding = !isGrounded && !isDashing && !isSliding && !isGrappling && isGlideHeld && rb.linearVelocity.y < 0f && currentGlideStamina > 0f;
 
         if (isGliding)
         {
+            currentGlideStamina = Mathf.Max(0f, currentGlideStamina - Time.deltaTime);
             rb.gravityScale = glideGravity;
             if (rb.linearVelocity.y < glideMaxFallSpeed)
                 rb.linearVelocity = new Vector2(rb.linearVelocity.x, glideMaxFallSpeed);
@@ -445,7 +454,9 @@ public class PlayerController : MonoBehaviour
         StopGrapple();
         rb.gravityScale = baseGravityScale;
         int jumpWallSide = wallSide != 0 ? wallSide : (lastWallSide != 0 ? lastWallSide : (facingRight ? 1 : -1));
-        rb.linearVelocity = new Vector2(-jumpWallSide * wallJumpHorizontalForce, wallJumpVerticalForce);
+        float wallJumpX = -jumpWallSide * wallJumpHorizontalForce;
+        float wallJumpY = Mathf.Min(wallJumpVerticalForce, jumpForce * 0.75f);
+        rb.linearVelocity = new Vector2(wallJumpX, wallJumpY);
         wallJumpMoveLockTimer = wallJumpMoveLockTime;
         jumpsRemaining = Mathf.Max(jumpsRemaining, maxJumps - 1);
         facingRight = rb.linearVelocity.x > 0f;
@@ -641,4 +652,6 @@ public class PlayerController : MonoBehaviour
     public bool IsGliding() => isGliding;
     public bool IsWallSliding() => isWallSliding;
     public bool IsGrappling() => isGrappling;
+    public float GetGlideStamina() => currentGlideStamina;
+    public float GetGlideStaminaNormalized() => maxGlideStamina <= 0f ? 0f : Mathf.Clamp01(currentGlideStamina / maxGlideStamina);
 }

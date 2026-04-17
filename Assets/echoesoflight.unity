@@ -456,6 +456,7 @@ GameObject:
   - component: {fileID: 726960822}
   - component: {fileID: 726960823}
   - component: {fileID: 726960824}
+  - component: {fileID: 726960825}
   m_Layer: 7
   m_Name: Player
   m_TagString: Untagged
@@ -656,13 +657,15 @@ MonoBehaviour:
   slideColliderHeightMultiplier: 0.5
   glideGravity: 0.35
   glideMaxFallSpeed: -2.5
+  maxGlideStamina: 5
+  glideStaminaRecoveryRate: 1.5
   wallLayer:
     serializedVersion: 2
     m_Bits: 256
   wallCheckDistance: 0.1
   wallSlideFallSpeed: -2.5
   wallJumpHorizontalForce: 11
-  wallJumpVerticalForce: 16
+  wallJumpVerticalForce: 9
   wallJumpMoveLockTime: 0.15
   wallCoyoteTime: 0.12
   wallStickTime: 0.15
@@ -705,6 +708,45 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 65
   visualsToToggle: []
+  moodRenderers:
+  - {fileID: 726960820}
+  lightModeTint: {r: 1, g: 0.95, b: 0.82, a: 1}
+  darkModeTint: {r: 0.55, g: 0.62, b: 0.8, a: 1}
+  tintLerpSpeed: 8
+  auraVisual: {fileID: 0}
+  auraPulseSpeed: 4
+  auraPulseAmount: 0.1
+--- !u!114 &726960825
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 726960817}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c3c583f5d0a641548e212a3a2de3f891, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::DarknessSpreadController
+  player: {fileID: 726960821}
+  playerController: {fileID: 726960823}
+  lantern: {fileID: 726960824}
+  respawnPoint: {fileID: 726960821}
+  darknessVisual: {fileID: 0}
+  startFrontX: -10
+  levelLeftX: -30
+  baseSpreadSpeed: 1.6
+  lanternSlowMultiplier: 0.35
+  catchBuffer: 0.35
+  darknessHeight: 20
+  darknessDepth: 0
+  fastDarknessColor: {r: 0.05, g: 0.03, b: 0.1, a: 0.78}
+  slowedDarknessColor: {r: 0.12, g: 0.1, b: 0.2, a: 0.65}
+  colorLerpSpeed: 5
+  pulseSpeed: 2.5
+  pulseAmount: 0.08
+  resetDarknessOnCatch: 1
+  catchResetDelay: 0.15
 --- !u!1 &910000001
 GameObject:
   m_ObjectHideFlags: 0
@@ -1390,7 +1432,7 @@ Transform:
   m_GameObject: {fileID: 910000041}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -0.4, y: 2.9, z: 0}
+  m_LocalPosition: {x: 0.35, y: 2.9, z: 0}
   m_LocalScale: {x: 2.3, y: 0.5, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -1547,7 +1589,7 @@ Transform:
   m_GameObject: {fileID: 910000051}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 4.2, y: 4.5, z: 0}
+  m_LocalPosition: {x: 3.3, y: 4.5, z: 0}
   m_LocalScale: {x: 2.4, y: 0.5, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []

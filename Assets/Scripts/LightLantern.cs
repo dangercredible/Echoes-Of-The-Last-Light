@@ -11,11 +11,25 @@ public class LightLantern : MonoBehaviour
 
     [Header("Optional Visuals")]
     public Behaviour[] visualsToToggle;
+    public SpriteRenderer[] moodRenderers;
+    public Color lightModeTint = new Color(1f, 0.95f, 0.82f, 1f);
+    public Color darkModeTint = new Color(0.55f, 0.62f, 0.8f, 1f);
+    public float tintLerpSpeed = 8f;
+    public Transform auraVisual;
+    public float auraPulseSpeed = 4f;
+    public float auraPulseAmount = 0.1f;
 
     private readonly HashSet<ILightReactive> litTargets = new HashSet<ILightReactive>();
+    private Vector3 auraBaseScale = Vector3.one;
 
     void Start()
     {
+        if (moodRenderers == null || moodRenderers.Length == 0)
+            moodRenderers = GetComponentsInParent<SpriteRenderer>();
+
+        if (auraVisual != null)
+            auraBaseScale = auraVisual.localScale;
+
         SetLanternState(startsOn);
     }
 
@@ -54,6 +68,8 @@ public class LightLantern : MonoBehaviour
         litTargets.Clear();
         foreach (ILightReactive reactive in currentFrame)
             litTargets.Add(reactive);
+
+        UpdateMoodVisuals();
     }
 
     public void ToggleLantern()
@@ -73,6 +89,9 @@ public class LightLantern : MonoBehaviour
 
         if (!enabledState)
             ClearLitTargets();
+
+        if (auraVisual != null)
+            auraVisual.gameObject.SetActive(enabledState);
     }
 
     void ClearLitTargets()
@@ -86,5 +105,31 @@ public class LightLantern : MonoBehaviour
     {
         Gizmos.color = Color.yellow;
         Gizmos.DrawWireSphere(transform.position, lightRadius);
+    }
+
+    void LateUpdate()
+    {
+        if (!Application.isPlaying)
+            return;
+
+        UpdateMoodVisuals();
+    }
+
+    void UpdateMoodVisuals()
+    {
+        Color targetTint = IsOn ? lightModeTint : darkModeTint;
+        for (int i = 0; i < moodRenderers.Length; i++)
+        {
+            if (moodRenderers[i] == null)
+                continue;
+
+            moodRenderers[i].color = Color.Lerp(moodRenderers[i].color, targetTint, Time.deltaTime * tintLerpSpeed);
+        }
+
+        if (auraVisual != null && IsOn)
+        {
+            float pulse = 1f + Mathf.Sin(Time.time * auraPulseSpeed) * auraPulseAmount;
+            auraVisual.localScale = auraBaseScale * pulse;
+        }
     }
 }
