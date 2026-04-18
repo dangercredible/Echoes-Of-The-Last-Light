@@ -35,18 +35,26 @@ public class PlayerController : MonoBehaviour
     [Header("Glide")]
     public float glideGravity = 0.35f;
     public float glideMaxFallSpeed = -2.5f;
+    public float maxGlideStamina = 5f;
+    public float glideStaminaRecoveryRate = 1.5f;
     private bool isGlideHeld;
     private bool isGliding;
+    private float currentGlideStamina;
 
     [Header("Wall Jump")]
     public LayerMask wallLayer;
     public float wallCheckDistance = 0.1f;
     public float wallSlideFallSpeed = -2.5f;
     public float wallJumpHorizontalForce = 11f;
-    public float wallJumpVerticalForce = 16f;
+    public float wallJumpVerticalForce = 9f;
     public float wallJumpMoveLockTime = 0.15f;
     public float wallCoyoteTime = 0.12f;
     public float wallStickTime = 0.15f;
+    [Tooltip("Wall jump triggers while moving up slower than this (lets you jump off shortly after pushing away).")]
+    public float wallJumpMaxRisingSpeed = 0.65f;
+    [Tooltip("If true, you only wall-slide when holding toward the wall (common 2D platformer feel).")]
+    public bool wallSlideRequiresHoldTowardWall = true;
+    public float wallPushHoldDeadzone = 0.12f;
     private bool isTouchingWall;
     private bool isWallSliding;
     private int wallSide;
@@ -62,10 +70,15 @@ public class PlayerController : MonoBehaviour
     public float grappleReelSpeed = 8f;
     public float grappleSwingAirControl = 20f;
     public float grappleCooldown = 0.25f;
+    public bool requireIlluminatedGrapplePoints = false;
     public LayerMask grappleBlockerLayer;
     public LineRenderer grappleLine;
     public int grappleLineSegments = 18;
     public float ropeSag = 0.75f;
+    public float grappleLineWidth = 0.06f;
+    public Color grappleLineColor = new Color(1f, 0.95f, 0.65f, 0.95f);
+    public float grappleDetachInertiaMultiplier = 1.12f;
+    public float grappleDetachMinHorizontalSpeed = 4.5f;
     private bool isGrappling;
     private bool grappleHeld;
     private float grappleCooldownTimer;
@@ -115,6 +128,7 @@ public class PlayerController : MonoBehaviour
         grappleJoint.maxDistanceOnly = true;
         grappleJoint.enableCollision = false;
         grappleJoint.enabled = false;
+        EnsureGrappleLine();
 
         if (capsuleCollider != null)
         {
@@ -125,6 +139,8 @@ public class PlayerController : MonoBehaviour
         wallFilter = new ContactFilter2D();
         wallFilter.SetLayerMask(wallLayer);
         wallFilter.useTriggers = false;
+
+        currentGlideStamina = maxGlideStamina;
     }
 
     void Update()
@@ -188,6 +204,9 @@ public class PlayerController : MonoBehaviour
     {
         if (value.isPressed)
         {
+            if (isGrappling)
+                DetachFromGrappleByJump();
+
             jumpBufferCounter = jumpBufferTime;
             isGlideHeld = true;
         }
@@ -221,8 +240,6 @@ public class PlayerController : MonoBehaviour
         grappleHeld = value.isPressed;
         if (value.isPressed)
             TryStartGrapple();
-        else
-            StopGrapple();
     }
 
     public void OnLantern(InputValue value)
@@ -249,7 +266,11 @@ public class PlayerController : MonoBehaviour
         moveInput = new Vector2(horizontal, vertical);
 
         if (Keyboard.current.spaceKey.wasPressedThisFrame || Keyboard.current.wKey.wasPressedThisFrame || Keyboard.current.upArrowKey.wasPressedThisFrame)
+        {
+            if (isGrappling)
+                DetachFromGrappleByJump();
             jumpBufferCounter = jumpBufferTime;
+        }
 
         if ((Keyboard.current.spaceKey.wasReleasedThisFrame || Keyboard.current.wKey.wasReleasedThisFrame || Keyboard.current.upArrowKey.wasReleasedThisFrame) && rb.linearVelocity.y > 0f)
             rb.linearVelocity = new Vector2(rb.linearVelocity.x, rb.linearVelocity.y * 0.5f);
@@ -260,16 +281,16 @@ public class PlayerController : MonoBehaviour
         if (Keyboard.current.leftCtrlKey.wasPressedThisFrame || Keyboard.current.cKey.wasPressedThisFrame)
             TryStartSlide();
 
-        if (Keyboard.current.eKey.wasPressedThisFrame)
+        bool grapplePressed = Keyboard.current.eKey.wasPressedThisFrame || Keyboard.current.qKey.wasPressedThisFrame;
+        if (grapplePressed || (Mouse.current != null && Mouse.current.rightButton.wasPressedThisFrame))
         {
             grappleHeld = true;
             TryStartGrapple();
         }
-        if (Keyboard.current.eKey.wasReleasedThisFrame)
-        {
+
+        bool grappleReleased = Keyboard.current.eKey.wasReleasedThisFrame || Keyboard.current.qKey.wasReleasedThisFrame;
+        if (grappleReleased || (Mouse.current != null && Mouse.current.rightButton.wasReleasedThisFrame))
             grappleHeld = false;
-            StopGrapple();
-        }
 
         if (Keyboard.current.fKey.wasPressedThisFrame)
             ToggleLantern();
@@ -287,11 +308,14 @@ public class PlayerController : MonoBehaviour
             jumpsRemaining = maxJumps;
             canDash = true;
             isGliding = false;
+            currentGlideStamina = Mathf.Min(maxGlideStamina, currentGlideStamina + glideStaminaRecoveryRate * Time.deltaTime);
             StopGrapple();
         }
         else
         {
             coyoteTimeCounter -= Time.deltaTime;
+            if (!isGliding)
+                currentGlideStamina = Mathf.Min(maxGlideStamina, currentGlideStamina + (glideStaminaRecoveryRate * 0.35f) * Time.deltaTime);
         }
     }
 
@@ -306,26 +330,42 @@ public class PlayerController : MonoBehaviour
 
         Bounds bounds = capsuleCollider.bounds;
         Vector2 center = bounds.center;
+        float halfHeight = Mathf.Clamp(bounds.extents.y * 0.82f, 0.08f, 3f);
+        Vector2 upper = center + Vector2.up * halfHeight;
+        Vector2 lower = center - Vector2.up * halfHeight;
         float castDistance = wallCheckDistance + 0.02f;
 
-        int hitLeftCount = Physics2D.Raycast(center, Vector2.left, wallFilter, wallHits, castDistance);
-        if (hitLeftCount > 0)
+        bool hitLeft = WallRayHit(lower, Vector2.left, castDistance)
+            || WallRayHit(center, Vector2.left, castDistance)
+            || WallRayHit(upper, Vector2.left, castDistance);
+        bool hitRight = WallRayHit(lower, Vector2.right, castDistance)
+            || WallRayHit(center, Vector2.right, castDistance)
+            || WallRayHit(upper, Vector2.right, castDistance);
+
+        if (hitLeft && hitRight)
+        {
+            isTouchingWall = true;
+            if (Mathf.Abs(moveInput.x) > 0.05f)
+                wallSide = moveInput.x > 0f ? 1 : -1;
+            else if (Mathf.Abs(rb.linearVelocity.x) > 0.05f)
+                wallSide = rb.linearVelocity.x > 0f ? 1 : -1;
+            else
+                wallSide = facingRight ? 1 : -1;
+        }
+        else if (hitLeft)
         {
             isTouchingWall = true;
             wallSide = -1;
-            lastWallSide = wallSide;
         }
-
-        int hitRightCount = Physics2D.Raycast(center, Vector2.right, wallFilter, wallHits, castDistance);
-        if (hitRightCount > 0)
+        else if (hitRight)
         {
             isTouchingWall = true;
             wallSide = 1;
-            lastWallSide = wallSide;
         }
 
         if (isTouchingWall)
         {
+            lastWallSide = wallSide;
             wallCoyoteCounter = wallCoyoteTime;
             if (moveInput.x * wallSide > 0.1f)
                 wallStickCounter = wallStickTime;
@@ -336,9 +376,16 @@ public class PlayerController : MonoBehaviour
             wallStickCounter -= Time.deltaTime;
         }
 
+        bool pushIntoWall = isTouchingWall && moveInput.x * wallSide > wallPushHoldDeadzone;
         bool hasWallGrace = wallCoyoteCounter > 0f && lastWallSide != 0;
-        if ((isTouchingWall || hasWallGrace) && rb.linearVelocity.y < 0f && !isGrounded)
+        bool slideInputOk = !wallSlideRequiresHoldTowardWall || pushIntoWall;
+        if ((isTouchingWall || hasWallGrace) && rb.linearVelocity.y < 0f && !isGrounded && slideInputOk)
             isWallSliding = true;
+    }
+
+    bool WallRayHit(Vector2 origin, Vector2 direction, float distance)
+    {
+        return Physics2D.Raycast(origin, direction, wallFilter, wallHits, distance) > 0;
     }
 
     void UpdateTimers()
@@ -346,8 +393,6 @@ public class PlayerController : MonoBehaviour
         jumpBufferCounter -= Time.deltaTime;
         grappleCooldownTimer -= Time.deltaTime;
         wallJumpMoveLockTimer -= Time.deltaTime;
-        wallCoyoteCounter -= Time.deltaTime;
-        wallStickCounter -= Time.deltaTime;
 
         if (isDashing)
         {
@@ -382,7 +427,11 @@ public class PlayerController : MonoBehaviour
         if (jumpBufferCounter <= 0f)
             return;
 
-        if (isWallSliding && !isGrounded && (isTouchingWall || wallCoyoteCounter > 0f))
+        bool wallJumpReady = !isGrounded
+            && (isTouchingWall || wallCoyoteCounter > 0f)
+            && rb.linearVelocity.y <= wallJumpMaxRisingSpeed;
+
+        if (wallJumpReady)
         {
             WallJump();
             jumpBufferCounter = 0f;
@@ -404,7 +453,7 @@ public class PlayerController : MonoBehaviour
             return;
         }
 
-        if (!grappleHeld || !grappleTarget.IsIlluminated)
+        if (requireIlluminatedGrapplePoints && !grappleTarget.IsIlluminated)
         {
             StopGrapple();
             return;
@@ -415,10 +464,11 @@ public class PlayerController : MonoBehaviour
 
     void UpdateGlideState()
     {
-        isGliding = !isGrounded && !isDashing && !isSliding && !isGrappling && isGlideHeld && rb.linearVelocity.y < 0f;
+        isGliding = !isGrounded && !isDashing && !isSliding && !isGrappling && isGlideHeld && rb.linearVelocity.y < 0f && currentGlideStamina > 0f;
 
         if (isGliding)
         {
+            currentGlideStamina = Mathf.Max(0f, currentGlideStamina - Time.deltaTime);
             rb.gravityScale = glideGravity;
             if (rb.linearVelocity.y < glideMaxFallSpeed)
                 rb.linearVelocity = new Vector2(rb.linearVelocity.x, glideMaxFallSpeed);
@@ -445,7 +495,9 @@ public class PlayerController : MonoBehaviour
         StopGrapple();
         rb.gravityScale = baseGravityScale;
         int jumpWallSide = wallSide != 0 ? wallSide : (lastWallSide != 0 ? lastWallSide : (facingRight ? 1 : -1));
-        rb.linearVelocity = new Vector2(-jumpWallSide * wallJumpHorizontalForce, wallJumpVerticalForce);
+        float wallJumpX = -jumpWallSide * wallJumpHorizontalForce;
+        float wallJumpY = Mathf.Min(wallJumpVerticalForce, jumpForce * 0.75f);
+        rb.linearVelocity = new Vector2(wallJumpX, wallJumpY);
         wallJumpMoveLockTimer = wallJumpMoveLockTime;
         jumpsRemaining = Mathf.Max(jumpsRemaining, maxJumps - 1);
         facingRight = rb.linearVelocity.x > 0f;
@@ -506,7 +558,7 @@ public class PlayerController : MonoBehaviour
 
     void TryStartGrapple()
     {
-        if (grappleCooldownTimer > 0f || isGrounded || isDashing || isSliding)
+        if (grappleCooldownTimer > 0f || isDashing || isSliding)
             return;
 
         LightGrapplePoint nearest = null;
@@ -515,7 +567,10 @@ public class PlayerController : MonoBehaviour
 
         foreach (LightGrapplePoint point in LightGrapplePoint.ActivePoints)
         {
-            if (point == null || !point.IsIlluminated)
+            if (point == null)
+                continue;
+
+            if (requireIlluminatedGrapplePoints && !point.IsIlluminated)
                 continue;
 
             float distance = Vector2.Distance(origin, point.transform.position);
@@ -564,6 +619,22 @@ public class PlayerController : MonoBehaviour
         UpdateGrappleLine(false);
     }
 
+    void DetachFromGrappleByJump()
+    {
+        if (!isGrappling)
+            return;
+
+        Vector2 releaseVelocity = rb.linearVelocity;
+        if (Mathf.Abs(releaseVelocity.x) < grappleDetachMinHorizontalSpeed)
+        {
+            float dir = facingRight ? 1f : -1f;
+            releaseVelocity.x = dir * grappleDetachMinHorizontalSpeed;
+        }
+
+        StopGrapple();
+        rb.linearVelocity = new Vector2(releaseVelocity.x * grappleDetachInertiaMultiplier, Mathf.Max(releaseVelocity.y, jumpForce * 0.55f));
+    }
+
     void UpdateGrappleLine(bool show)
     {
         if (grappleLine == null)
@@ -590,6 +661,39 @@ public class PlayerController : MonoBehaviour
             Vector3 point = Vector3.Lerp(a, b, t);
             grappleLine.SetPosition(i, point);
         }
+    }
+
+    void EnsureGrappleLine()
+    {
+        if (grappleLine != null)
+        {
+            ConfigureGrappleLine(grappleLine);
+            return;
+        }
+
+        GameObject ropeObject = new GameObject("GrappleLine");
+        ropeObject.transform.SetParent(transform);
+        ropeObject.transform.localPosition = Vector3.zero;
+        ropeObject.transform.localRotation = Quaternion.identity;
+        grappleLine = ropeObject.AddComponent<LineRenderer>();
+        ConfigureGrappleLine(grappleLine);
+    }
+
+    void ConfigureGrappleLine(LineRenderer line)
+    {
+        line.enabled = false;
+        line.useWorldSpace = true;
+        line.widthMultiplier = grappleLineWidth;
+        line.positionCount = Mathf.Max(2, grappleLineSegments);
+        line.numCapVertices = 4;
+        line.numCornerVertices = 2;
+        line.sortingOrder = 20;
+        line.startColor = grappleLineColor;
+        line.endColor = grappleLineColor;
+
+        Shader lineShader = Shader.Find("Sprites/Default");
+        if (line.material == null && lineShader != null)
+            line.material = new Material(lineShader);
     }
 
     void ToggleLantern()
@@ -630,9 +734,15 @@ public class PlayerController : MonoBehaviour
     public void Die()
     {
         StopSlide();
+        StopGrapple();
         isDashing = false;
         isGliding = false;
+        isWallSliding = false;
+        wallJumpMoveLockTimer = 0f;
+        wallCoyoteCounter = 0f;
+        wallStickCounter = 0f;
         rb.gravityScale = baseGravityScale;
+        rb.linearVelocity = Vector2.zero;
     }
 
     public bool IsGrounded() => isGrounded;
@@ -641,4 +751,6 @@ public class PlayerController : MonoBehaviour
     public bool IsGliding() => isGliding;
     public bool IsWallSliding() => isWallSliding;
     public bool IsGrappling() => isGrappling;
+    public float GetGlideStamina() => currentGlideStamina;
+    public float GetGlideStaminaNormalized() => maxGlideStamina <= 0f ? 0f : Mathf.Clamp01(currentGlideStamina / maxGlideStamina);
 }

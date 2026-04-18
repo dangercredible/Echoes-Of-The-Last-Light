@@ -14,6 +14,16 @@ public class LightGrapplePoint : MonoBehaviour, ILightReactive
     public Color activeColor = new Color(1f, 0.95f, 0.4f, 1f);
     public Color inactiveColor = new Color(0.35f, 0.35f, 0.35f, 1f);
 
+    void Awake()
+    {
+        if (GetComponent<Collider2D>() == null)
+        {
+            CircleCollider2D circle = gameObject.AddComponent<CircleCollider2D>();
+            circle.isTrigger = true;
+            circle.radius = 0.95f;
+        }
+    }
+
     void OnEnable()
     {
         ActivePoints.Add(this);
