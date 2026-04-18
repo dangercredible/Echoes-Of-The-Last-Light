@@ -108,8 +108,10 @@ public class PlayerController : MonoBehaviour
     private float baseGravityScale;
     private bool facingRight = true;
     private Vector2 moveInput;
+    private Vector2 moveInputFromActions;
     private ContactFilter2D wallFilter;
     private readonly RaycastHit2D[] wallHits = new RaycastHit2D[2];
+    private readonly RaycastHit2D[] grappleCastHits = new RaycastHit2D[12];
     private DistanceJoint2D grappleJoint;
 
     void Awake()
@@ -126,9 +128,12 @@ public class PlayerController : MonoBehaviour
         grappleJoint.autoConfigureConnectedAnchor = false;
         grappleJoint.autoConfigureDistance = false;
         grappleJoint.maxDistanceOnly = true;
-        grappleJoint.enableCollision = false;
+        grappleJoint.enableCollision = true;
         grappleJoint.enabled = false;
         EnsureGrappleLine();
+
+        rb.collisionDetectionMode = CollisionDetectionMode2D.Continuous;
+        rb.interpolation = RigidbodyInterpolation2D.Interpolate;
 
         if (capsuleCollider != null)
         {
@@ -165,13 +170,20 @@ public class PlayerController : MonoBehaviour
         {
             if (grappleJoint != null && grappleJoint.enabled)
             {
-                float nextDistance = grappleJoint.distance - (moveInput.y * grappleReelSpeed * Time.fixedDeltaTime);
+                float reelAxis = moveInput.y;
+                if (Keyboard.current != null && Keyboard.current.wKey.isPressed)
+                    reelAxis += 1f;
+                if (Keyboard.current != null && Keyboard.current.sKey.isPressed)
+                    reelAxis -= 1f;
+                reelAxis = Mathf.Clamp(reelAxis, -1f, 1f);
+                float nextDistance = grappleJoint.distance - (reelAxis * grappleReelSpeed * Time.fixedDeltaTime);
                 grappleJoint.distance = Mathf.Clamp(nextDistance, grappleMinRopeLength, grappleMaxRopeLength);
             }
 
             if (Mathf.Abs(moveInput.x) > 0.05f)
                 rb.AddForce(new Vector2(moveInput.x * grappleSwingAirControl, 0f), ForceMode2D.Force);
 
+            PreventGrappleTunnelingThroughSolids();
             return;
         }
 
@@ -197,7 +209,9 @@ public class PlayerController : MonoBehaviour
 
     public void OnMove(InputValue value)
     {
-        moveInput = value.Get<Vector2>();
+        moveInputFromActions = value.Get<Vector2>();
+        if (Keyboard.current == null)
+            moveInput = moveInputFromActions;
     }
 
     public void OnJump(InputValue value)
@@ -251,7 +265,10 @@ public class PlayerController : MonoBehaviour
     void ApplyKeyboardFallbackInput()
     {
         if (Keyboard.current == null)
+        {
+            moveInput = moveInputFromActions;
             return;
+        }
 
         float horizontal = 0f;
         float vertical = 0f;
@@ -259,26 +276,26 @@ public class PlayerController : MonoBehaviour
             horizontal -= 1f;
         if (Keyboard.current.dKey.isPressed || Keyboard.current.rightArrowKey.isPressed)
             horizontal += 1f;
-        if (Keyboard.current.wKey.isPressed || Keyboard.current.upArrowKey.isPressed)
+        if (Keyboard.current.upArrowKey.isPressed)
             vertical += 1f;
-        if (Keyboard.current.sKey.isPressed || Keyboard.current.downArrowKey.isPressed)
+        if (Keyboard.current.downArrowKey.isPressed)
             vertical -= 1f;
         moveInput = new Vector2(horizontal, vertical);
 
-        if (Keyboard.current.spaceKey.wasPressedThisFrame || Keyboard.current.wKey.wasPressedThisFrame || Keyboard.current.upArrowKey.wasPressedThisFrame)
+        if (Keyboard.current.spaceKey.wasPressedThisFrame || Keyboard.current.upArrowKey.wasPressedThisFrame)
         {
             if (isGrappling)
                 DetachFromGrappleByJump();
             jumpBufferCounter = jumpBufferTime;
         }
 
-        if ((Keyboard.current.spaceKey.wasReleasedThisFrame || Keyboard.current.wKey.wasReleasedThisFrame || Keyboard.current.upArrowKey.wasReleasedThisFrame) && rb.linearVelocity.y > 0f)
+        if ((Keyboard.current.spaceKey.wasReleasedThisFrame || Keyboard.current.upArrowKey.wasReleasedThisFrame) && rb.linearVelocity.y > 0f)
             rb.linearVelocity = new Vector2(rb.linearVelocity.x, rb.linearVelocity.y * 0.5f);
 
         if (Keyboard.current.leftShiftKey.wasPressedThisFrame || Keyboard.current.rightShiftKey.wasPressedThisFrame)
             TryStartDash();
 
-        if (Keyboard.current.leftCtrlKey.wasPressedThisFrame || Keyboard.current.cKey.wasPressedThisFrame)
+        if (Keyboard.current.leftCtrlKey.wasPressedThisFrame || Keyboard.current.cKey.wasPressedThisFrame || Keyboard.current.sKey.wasPressedThisFrame)
             TryStartSlide();
 
         bool grapplePressed = Keyboard.current.eKey.wasPressedThisFrame || Keyboard.current.qKey.wasPressedThisFrame;
@@ -292,8 +309,7 @@ public class PlayerController : MonoBehaviour
         if (grappleReleased || (Mouse.current != null && Mouse.current.rightButton.wasReleasedThisFrame))
             grappleHeld = false;
 
-        if (Keyboard.current.fKey.wasPressedThisFrame)
-            ToggleLantern();
+        // Lantern is bound to F on PlayerInput (Lantern action). Do not toggle F here — it would double-toggle with OnLantern().
 
         isGlideHeld = Keyboard.current.spaceKey.isPressed || Keyboard.current.rightShiftKey.isPressed;
     }
@@ -617,6 +633,42 @@ public class PlayerController : MonoBehaviour
         if (grappleJoint != null)
             grappleJoint.enabled = false;
         UpdateGrappleLine(false);
+    }
+
+    void PreventGrappleTunnelingThroughSolids()
+    {
+        if (capsuleCollider == null)
+            return;
+
+        Vector2 v = rb.linearVelocity;
+        if (v.sqrMagnitude < 0.5f)
+            return;
+
+        float travel = v.magnitude * Time.fixedDeltaTime + 0.15f;
+        Vector2 dir = v.normalized;
+
+        ContactFilter2D filter = new ContactFilter2D();
+        filter.useTriggers = false;
+        filter.useLayerMask = true;
+        filter.SetLayerMask(groundLayer | wallLayer);
+
+        int count = capsuleCollider.Cast(dir, filter, grappleCastHits, travel);
+        if (count <= 0)
+            return;
+
+        RaycastHit2D hit = grappleCastHits[0];
+        for (int i = 1; i < count; i++)
+        {
+            if (grappleCastHits[i].distance < hit.distance)
+                hit = grappleCastHits[i];
+        }
+
+        if (hit.collider == null)
+            return;
+
+        float vn = Vector2.Dot(v, hit.normal);
+        if (vn < 0f)
+            rb.linearVelocity = v - vn * hit.normal;
     }
 
     void DetachFromGrappleByJump()

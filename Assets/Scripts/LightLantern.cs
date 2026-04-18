@@ -3,6 +3,8 @@ using UnityEngine;
 
 public class LightLantern : MonoBehaviour
 {
+    readonly List<Collider2D> overlapWorkList = new List<Collider2D>(64);
+
     [Header("Lantern")]
     [Tooltip("If false, press F to turn the lantern on — light platforms and grapple points only react while the lantern is on.")]
     public bool startsOn = false;
@@ -39,11 +41,11 @@ public class LightLantern : MonoBehaviour
         if (!IsOn)
             return;
 
-        Collider2D[] hits = GetOverlapHits();
+        GatherOverlappingColliders();
 
-        for (int i = 0; i < hits.Length; i++)
+        for (int i = 0; i < overlapWorkList.Count; i++)
         {
-            MonoBehaviour[] behaviours = hits[i].GetComponentsInParent<MonoBehaviour>(true);
+            MonoBehaviour[] behaviours = overlapWorkList[i].GetComponentsInParent<MonoBehaviour>(true);
             for (int b = 0; b < behaviours.Length; b++)
             {
                 if (behaviours[b] is ILightReactive reactive)
@@ -174,26 +176,28 @@ public class LightLantern : MonoBehaviour
         }
     }
 
-    Collider2D[] GetOverlapHits()
+    void GatherOverlappingColliders()
     {
+        overlapWorkList.Clear();
+
+        ContactFilter2D filter = new ContactFilter2D();
+        filter.useTriggers = true;
         if (affectedLayers.value != 0)
         {
-            Collider2D[] masked = Physics2D.OverlapCircleAll(transform.position, lightRadius, affectedLayers);
-            if (masked.Length == 0)
-                return Physics2D.OverlapCircleAll(transform.position, lightRadius);
-            return masked;
+            filter.useLayerMask = true;
+            filter.SetLayerMask(affectedLayers);
         }
 
-        return Physics2D.OverlapCircleAll(transform.position, lightRadius);
+        Physics2D.OverlapCircle(transform.position, lightRadius, filter, overlapWorkList);
     }
 
     void IlluminateInRange()
     {
-        Collider2D[] hits = GetOverlapHits();
+        GatherOverlappingColliders();
 
-        for (int i = 0; i < hits.Length; i++)
+        for (int i = 0; i < overlapWorkList.Count; i++)
         {
-            MonoBehaviour[] behaviours = hits[i].GetComponentsInParent<MonoBehaviour>(true);
+            MonoBehaviour[] behaviours = overlapWorkList[i].GetComponentsInParent<MonoBehaviour>(true);
             for (int b = 0; b < behaviours.Length; b++)
             {
                 if (behaviours[b] is ILightReactive reactive)
