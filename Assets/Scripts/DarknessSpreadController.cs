@@ -96,7 +96,16 @@ public class DarknessSpreadController : MonoBehaviour
         catchCooldown = catchResetDelay;
 
         if (playerController != null)
-            playerController.Die();
+        {
+            PlayerHealth health = playerController.GetComponent<PlayerHealth>();
+            if (health != null)
+            {
+                health.Kill("The darkness caught you.");
+                return;
+            }
+            else
+                playerController.Die();
+        }
 
         player.position = respawnPoint != null ? respawnPoint.position : playerStartPosition;
 

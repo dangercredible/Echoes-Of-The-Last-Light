@@ -68,6 +68,9 @@ public class EchoesLevelBootstrap : MonoBehaviour
             return;
 
         TryBuildLayout();
+
+        EnsurePlayerDeathSystems();
+        EnsureLightBridgeConversionOnExistingPlatforms();
     }
 
     public void TryBuildLayout()
@@ -94,7 +97,7 @@ public class EchoesLevelBootstrap : MonoBehaviour
             string n = root.name;
             if (n == "Ground_Left" || n == "Ground_Right" || n == "PitKillZone" || n == "Respawn_Pit"
                 || n.StartsWith("Platform_Auto_") || n.StartsWith("Wall_Auto_")
-                || n.StartsWith("GrapplePoint_Auto_"))
+                || n.StartsWith("GrapplePoint_Auto_") || n == "GameOverController")
                 UnityEditor.Undo.DestroyObjectImmediate(root);
         }
 
@@ -119,10 +122,7 @@ public class EchoesLevelBootstrap : MonoBehaviour
 
     void BuildLayoutCore()
     {
-        Vector3 playerStart = Vector3.zero;
         GameObject playerObject = GameObject.Find("Player");
-        if (playerObject != null)
-            playerStart = playerObject.transform.position;
 
         Sprite groundSprite = null;
         GameObject groundObject = GameObject.Find("Ground");
@@ -176,10 +176,9 @@ public class EchoesLevelBootstrap : MonoBehaviour
             float spawnX = worldLeft + spawnInsetFromLeftEdge;
             float spawnY = groundY + playerSpawnYOffsetFromGround;
             playerObject.transform.position = new Vector3(spawnX, spawnY, 0f);
-            playerStart = playerObject.transform.position;
         }
 
-        CreatePitKillZone(playerStart, pitMin, pitMax);
+        CreatePitKillZone(pitMin, pitMax);
 
         DarknessSpreadController darkness = Object.FindFirstObjectByType<DarknessSpreadController>();
         if (darkness != null)
@@ -195,6 +194,8 @@ public class EchoesLevelBootstrap : MonoBehaviour
 
         SpawnExtraPlatforms(groundSprite, half, pitMin, pitMax);
         SpawnExtraGrapplePoints(half, pitMin, pitMax);
+        EnsurePlayerDeathSystems();
+        EnsureLightBridgeConversionOnExistingPlatforms();
 
 #if UNITY_EDITOR
         if (!Application.isPlaying)
@@ -239,7 +240,7 @@ public class EchoesLevelBootstrap : MonoBehaviour
 #endif
     }
 
-    void CreatePitKillZone(Vector3 playerRespawn, float pitMin, float pitMax)
+    void CreatePitKillZone(float pitMin, float pitMax)
     {
         float pitCenter = (pitMin + pitMax) * 0.5f;
         GameObject pit = new GameObject("PitKillZone");
@@ -251,16 +252,11 @@ public class EchoesLevelBootstrap : MonoBehaviour
         trigger.size = new Vector2(Mathf.Max(4f, pitWidth + 3f), 30f);
 
         FallDeathZone death = pit.AddComponent<FallDeathZone>();
-        GameObject respawn = new GameObject("Respawn_Pit");
-        respawn.transform.position = playerRespawn;
-        death.respawnPoint = respawn.transform;
+        death.deathMessage = "You fell into the pit.";
 
 #if UNITY_EDITOR
         if (!Application.isPlaying)
-        {
             UnityEditor.Undo.RegisterCreatedObjectUndo(pit, "Echoes Level");
-            UnityEditor.Undo.RegisterCreatedObjectUndo(respawn, "Echoes Level");
-        }
 #endif
     }
 
@@ -464,5 +460,80 @@ public class EchoesLevelBootstrap : MonoBehaviour
         if (!Application.isPlaying)
             UnityEditor.Undo.RegisterCreatedObjectUndo(pointObject, "Echoes Level");
 #endif
+    }
+
+    void EnsurePlayerDeathSystems()
+    {
+        GameObject playerObject = GameObject.Find("Player");
+        if (playerObject == null)
+            return;
+
+        if (playerObject.GetComponent<PlayerHealth>() == null)
+            playerObject.AddComponent<PlayerHealth>();
+
+        PlayerHealth health = playerObject.GetComponent<PlayerHealth>();
+        if (health != null)
+            health.maxHealth = Mathf.Max(health.maxHealth, 3);
+
+        FallOutOfBoundsDeath outOfBounds = playerObject.GetComponent<FallOutOfBoundsDeath>();
+        if (outOfBounds == null)
+            outOfBounds = playerObject.AddComponent<FallOutOfBoundsDeath>();
+        outOfBounds.killY = groundY - 26f;
+        outOfBounds.deathMessage = "You fell out of bounds.";
+
+        if (GameOverController.InstanceOrFind() == null)
+        {
+            GameObject go = new GameObject("GameOverController");
+            go.AddComponent<GameOverController>();
+#if UNITY_EDITOR
+            if (!Application.isPlaying)
+                UnityEditor.Undo.RegisterCreatedObjectUndo(go, "Echoes Level");
+#endif
+        }
+    }
+
+    void EnsureLightBridgeConversionOnExistingPlatforms()
+    {
+        LightActivatedPlatform template = null;
+        GameObject lightBridgeObject = GameObject.Find("Platform_LightBridge_A");
+        if (lightBridgeObject != null)
+            template = lightBridgeObject.GetComponent<LightActivatedPlatform>();
+        if (template == null)
+            return;
+
+        if (lightBridgeAutoPlatformIndices == null)
+            return;
+
+        for (int i = 0; i < lightBridgeAutoPlatformIndices.Length; i++)
+        {
+            int idx = lightBridgeAutoPlatformIndices[i];
+            GameObject plat = GameObject.Find($"Platform_Auto_{idx}");
+            if (plat == null)
+                continue;
+
+            if (plat.GetComponent<LightActivatedPlatform>() != null)
+                continue;
+
+            SpriteRenderer sr = plat.GetComponent<SpriteRenderer>();
+            Collider2D col = plat.GetComponent<Collider2D>();
+            if (sr == null || col == null)
+                continue;
+
+            LightActivatedPlatform bridge = plat.AddComponent<LightActivatedPlatform>();
+            bridge.solidCollider = col;
+            bridge.visual = sr;
+            bridge.startsEnabled = template.startsEnabled;
+            bridge.staysEnabledAfterFirstLight = template.staysEnabledAfterFirstLight;
+            bridge.enabledColor = template.enabledColor;
+            bridge.disabledColor = template.disabledColor;
+            bridge.pulseSpeed = template.pulseSpeed;
+            bridge.litPulseStrength = template.litPulseStrength;
+            bridge.darkPulseStrength = template.darkPulseStrength;
+            bridge.litScaleBoost = template.litScaleBoost;
+            bridge.stateFlashDuration = template.stateFlashDuration;
+            bridge.flashColor = template.flashColor;
+
+            bridge.SetIlluminated(bridge.startsEnabled);
+        }
     }
 }
