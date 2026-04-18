@@ -4,7 +4,8 @@ using UnityEngine;
 public class LightLantern : MonoBehaviour
 {
     [Header("Lantern")]
-    public bool startsOn = true;
+    [Tooltip("If false, press F to turn the lantern on — light platforms and grapple points only react while the lantern is on.")]
+    public bool startsOn = false;
     public float lightRadius = 6f;
     public LayerMask affectedLayers;
     public bool IsOn { get; private set; }
@@ -12,8 +13,8 @@ public class LightLantern : MonoBehaviour
     [Header("Optional Visuals")]
     public Behaviour[] visualsToToggle;
     public SpriteRenderer[] moodRenderers;
-    public Color lightModeTint = new Color(1f, 0.95f, 0.82f, 1f);
-    public Color darkModeTint = new Color(0.55f, 0.62f, 0.8f, 1f);
+    public Color lightModeTint = new Color(0.92f, 0.9f, 1f, 1f);
+    public Color darkModeTint = new Color(0.38f, 0.42f, 0.58f, 1f);
     public float tintLerpSpeed = 8f;
     public Transform auraVisual;
     public float auraPulseSpeed = 4f;
@@ -39,7 +40,6 @@ public class LightLantern : MonoBehaviour
             return;
 
         Collider2D[] hits = GetOverlapHits();
-        HashSet<ILightReactive> currentFrame = new HashSet<ILightReactive>();
 
         for (int i = 0; i < hits.Length; i++)
         {
@@ -48,28 +48,25 @@ public class LightLantern : MonoBehaviour
             {
                 if (behaviours[b] is ILightReactive reactive)
                 {
-                    currentFrame.Add(reactive);
                     if (!litTargets.Contains(reactive))
+                    {
                         reactive.SetIlluminated(true);
+                        litTargets.Add(reactive);
+                    }
                 }
             }
         }
 
-        List<ILightReactive> toDisable = new List<ILightReactive>();
-        foreach (ILightReactive reactive in litTargets)
+        PlayerController pcSwing = Object.FindFirstObjectByType<PlayerController>();
+        if (pcSwing != null && pcSwing.IsGrappling())
         {
-            if (!currentFrame.Contains(reactive))
-                toDisable.Add(reactive);
+            LightGrapplePoint swingTarget = pcSwing.GetActiveGrappleTarget();
+            if (swingTarget != null && !litTargets.Contains(swingTarget))
+            {
+                swingTarget.SetIlluminated(true);
+                litTargets.Add(swingTarget);
+            }
         }
-
-        for (int i = 0; i < toDisable.Count; i++)
-            toDisable[i].SetIlluminated(false);
-
-        litTargets.Clear();
-        foreach (ILightReactive reactive in currentFrame)
-            litTargets.Add(reactive);
-
-        UpdateMoodVisuals();
     }
 
     public void ToggleLantern()
@@ -101,15 +98,26 @@ public class LightLantern : MonoBehaviour
 
     void ClearLitTargets()
     {
+        List<ILightReactive> toRemove = new List<ILightReactive>();
         foreach (ILightReactive reactive in litTargets)
+        {
+            if (ShouldKeepGrappleLitForActiveSwing(reactive))
+                continue;
             reactive.SetIlluminated(false);
-        litTargets.Clear();
+            toRemove.Add(reactive);
+        }
+
+        for (int i = 0; i < toRemove.Count; i++)
+            litTargets.Remove(toRemove[i]);
     }
 
-    void OnDrawGizmosSelected()
+    bool ShouldKeepGrappleLitForActiveSwing(ILightReactive reactive)
     {
-        Gizmos.color = Color.yellow;
-        Gizmos.DrawWireSphere(transform.position, lightRadius);
+        if (reactive is not LightGrapplePoint point)
+            return false;
+
+        PlayerController player = Object.FindFirstObjectByType<PlayerController>();
+        return player != null && player.IsGrappling() && player.GetActiveGrappleTarget() == point;
     }
 
     void LateUpdate()
@@ -117,7 +125,32 @@ public class LightLantern : MonoBehaviour
         if (!Application.isPlaying)
             return;
 
+        if (!IsOn)
+        {
+            PlayerController player = Object.FindFirstObjectByType<PlayerController>();
+            if (player == null || !player.IsGrappling())
+            {
+                List<ILightReactive> toRemove = new List<ILightReactive>();
+                foreach (ILightReactive reactive in litTargets)
+                {
+                    if (ShouldKeepGrappleLitForActiveSwing(reactive))
+                        continue;
+                    reactive.SetIlluminated(false);
+                    toRemove.Add(reactive);
+                }
+
+                for (int i = 0; i < toRemove.Count; i++)
+                    litTargets.Remove(toRemove[i]);
+            }
+        }
+
         UpdateMoodVisuals();
+    }
+
+    void OnDrawGizmosSelected()
+    {
+        Gizmos.color = Color.yellow;
+        Gizmos.DrawWireSphere(transform.position, lightRadius);
     }
 
     void UpdateMoodVisuals()

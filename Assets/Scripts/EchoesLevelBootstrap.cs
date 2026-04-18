@@ -17,7 +17,7 @@ public class EchoesLevelBootstrap : MonoBehaviour
     public float groundY = -4f;
 
     [Header("Extra content (no scaling of existing scene objects)")]
-    public int extraPlatformColumns = 28;
+    public int extraPlatformColumns = 36;
     public float extraPlatformSpacing = 6.5f;
     public float extraPlatformMinY = -1.5f;
     public float extraPlatformMaxY = 30f;
@@ -51,9 +51,13 @@ public class EchoesLevelBootstrap : MonoBehaviour
     [Tooltip("Player transform Y so feet sit on the main floor (ground center Y + this).")]
     public float playerSpawnYOffsetFromGround = 1.12f;
 
-    [Header("Light bridges (auto platforms)")]
-    [Tooltip("Indices i for Platform_Auto_i that become LightActivatedPlatform bridges (copy style from Platform_LightBridge_A).")]
+    [Header("Light bridges (generated platforms)")]
+    [Tooltip("Indices i for Platform_i that become LightActivatedPlatform bridges (copy style from Platform_LightBridge_A).")]
     public int[] lightBridgeAutoPlatformIndices = { 7, 9, 15, 16, 19 };
+
+    [Header("Bouncy pads (Mario-style)")]
+    [Tooltip("Indices i for regular Platform_i that bounce the player upward when landed on.")]
+    public int[] bouncyPlatformIndices = { 3, 12, 20 };
 
     [Header("Editor")]
     [Tooltip("When on, the level is generated in Edit Mode so you can see it in the Scene view. Uses the original Ground sprite once, then the cached sprite below if Ground is already gone.")]
@@ -67,10 +71,12 @@ public class EchoesLevelBootstrap : MonoBehaviour
         if (!gameObject.scene.IsValid())
             return;
 
+        EnsureRoundCompleteControllerExists();
         TryBuildLayout();
 
         EnsurePlayerDeathSystems();
         EnsureLightBridgeConversionOnExistingPlatforms();
+        EnsureRoundCheckpointIfMissing();
     }
 
     public void TryBuildLayout()
@@ -96,8 +102,9 @@ public class EchoesLevelBootstrap : MonoBehaviour
         {
             string n = root.name;
             if (n == "Ground_Left" || n == "Ground_Right" || n == "PitKillZone" || n == "Respawn_Pit"
-                || n.StartsWith("Platform_Auto_") || n.StartsWith("Wall_Auto_")
-                || n.StartsWith("GrapplePoint_Auto_") || n == "GameOverController")
+                || IsGeneratedPlatformRootName(n) || n.StartsWith("Wall_Auto_")
+                || IsGeneratedGrapplePointRootName(n) || n == "GameOverController" || n == "RoundCompleteController"
+                || n == "LevelCheckpoint")
                 UnityEditor.Undo.DestroyObjectImmediate(root);
         }
 
@@ -220,7 +227,7 @@ public class EchoesLevelBootstrap : MonoBehaviour
             Destroy(target);
     }
 
-    void CreateGroundChunk(string chunkName, Sprite sprite, Vector3 position, Vector3 scale, int layer)
+    GameObject CreateGroundChunk(string chunkName, Sprite sprite, Vector3 position, Vector3 scale, int layer)
     {
         GameObject chunk = new GameObject(chunkName);
         chunk.layer = layer;
@@ -229,7 +236,7 @@ public class EchoesLevelBootstrap : MonoBehaviour
 
         SpriteRenderer renderer = chunk.AddComponent<SpriteRenderer>();
         renderer.sprite = sprite;
-        renderer.color = new Color(0.2f, 0.2f, 0.22f, 1f);
+        renderer.color = new Color(0.11f, 0.1f, 0.2f, 1f);
 
         BoxCollider2D collider = chunk.AddComponent<BoxCollider2D>();
         collider.size = Vector2.one;
@@ -238,6 +245,7 @@ public class EchoesLevelBootstrap : MonoBehaviour
         if (!Application.isPlaying)
             UnityEditor.Undo.RegisterCreatedObjectUndo(chunk, "Echoes Level");
 #endif
+        return chunk;
     }
 
     void CreatePitKillZone(float pitMin, float pitMax)
@@ -285,7 +293,7 @@ public class EchoesLevelBootstrap : MonoBehaviour
 
             SpriteRenderer renderer = wall.AddComponent<SpriteRenderer>();
             renderer.sprite = wallSprite;
-            renderer.color = new Color(0.32f, 0.32f, 0.4f, 1f);
+            renderer.color = new Color(0.26f, 0.2f, 0.4f, 1f);
 
             BoxCollider2D collider = wall.AddComponent<BoxCollider2D>();
             collider.size = Vector2.one;
@@ -325,7 +333,11 @@ public class EchoesLevelBootstrap : MonoBehaviour
             if (AutoPlatformIndexIsLightBridge(i))
                 CreateLightBridgePlatform(lightBridgeTemplate, sprite, position, scale, 6, i);
             else
-                CreateGroundChunk($"Platform_Auto_{i}", sprite, position, scale, 6);
+            {
+                GameObject plat = CreateGroundChunk(GeneratedPlatformName(i), sprite, position, scale, 6);
+                if (plat != null && AutoPlatformIndexIsBouncy(i))
+                    plat.AddComponent<BouncyPlatform>();
+            }
         }
     }
 
@@ -341,15 +353,55 @@ public class EchoesLevelBootstrap : MonoBehaviour
         return false;
     }
 
+    bool AutoPlatformIndexIsBouncy(int index)
+    {
+        if (bouncyPlatformIndices == null)
+            return false;
+        for (int j = 0; j < bouncyPlatformIndices.Length; j++)
+        {
+            if (bouncyPlatformIndices[j] == index)
+                return true;
+        }
+        return false;
+    }
+
+    static string GeneratedPlatformName(int index) => $"Platform_{index}";
+
+    static string GeneratedGrapplePointName(int index) => $"GrapplePoint_{index}";
+
+#if UNITY_EDITOR
+    static bool IsGeneratedPlatformRootName(string objectName)
+    {
+        if (objectName.StartsWith("Platform_Auto_"))
+            return true;
+        if (!objectName.StartsWith("Platform_"))
+            return false;
+        string rest = objectName.Substring("Platform_".Length);
+        return int.TryParse(rest, out _);
+    }
+
+    static bool IsGeneratedGrapplePointRootName(string objectName)
+    {
+        if (objectName.StartsWith("GrapplePoint_Auto_"))
+            return true;
+        if (!objectName.StartsWith("GrapplePoint_"))
+            return false;
+        string rest = objectName.Substring("GrapplePoint_".Length);
+        return int.TryParse(rest, out _);
+    }
+#endif
+
     void CreateLightBridgePlatform(LightActivatedPlatform template, Sprite fallbackSprite, Vector3 position, Vector3 scale, int layer, int index)
     {
         if (template == null)
         {
-            CreateGroundChunk($"Platform_Auto_{index}", fallbackSprite, position, scale, layer);
+            GameObject plat = CreateGroundChunk(GeneratedPlatformName(index), fallbackSprite, position, scale, layer);
+            if (plat != null && AutoPlatformIndexIsBouncy(index))
+                plat.AddComponent<BouncyPlatform>();
             return;
         }
 
-        GameObject chunk = new GameObject($"Platform_Auto_{index}");
+        GameObject chunk = new GameObject(GeneratedPlatformName(index));
         chunk.layer = layer;
         chunk.transform.position = position;
         chunk.transform.localScale = scale;
@@ -438,7 +490,7 @@ public class EchoesLevelBootstrap : MonoBehaviour
 
     void CreateAutoGrapplePoint(LightGrapplePoint templatePoint, SpriteRenderer templateRenderer, Vector3 position, int index)
     {
-        GameObject pointObject = new GameObject($"GrapplePoint_Auto_{index}");
+        GameObject pointObject = new GameObject(GeneratedGrapplePointName(index));
         pointObject.layer = templateRenderer.gameObject.layer;
         pointObject.transform.position = position;
         pointObject.transform.localScale = templateRenderer.transform.lossyScale;
@@ -475,6 +527,10 @@ public class EchoesLevelBootstrap : MonoBehaviour
         if (health != null)
             health.maxHealth = Mathf.Max(health.maxHealth, 3);
 
+        LightLantern lantern = playerObject.GetComponentInChildren<LightLantern>(true);
+        if (lantern != null)
+            lantern.startsOn = false;
+
         FallOutOfBoundsDeath outOfBounds = playerObject.GetComponent<FallOutOfBoundsDeath>();
         if (outOfBounds == null)
             outOfBounds = playerObject.AddComponent<FallOutOfBoundsDeath>();
@@ -490,6 +546,52 @@ public class EchoesLevelBootstrap : MonoBehaviour
                 UnityEditor.Undo.RegisterCreatedObjectUndo(go, "Echoes Level");
 #endif
         }
+
+    }
+
+    void EnsureRoundCompleteControllerExists()
+    {
+        if (RoundCompleteController.InstanceOrFind() != null)
+            return;
+
+        GameObject rgo = new GameObject("RoundCompleteController");
+        rgo.AddComponent<RoundCompleteController>();
+#if UNITY_EDITOR
+        if (!Application.isPlaying)
+            UnityEditor.Undo.RegisterCreatedObjectUndo(rgo, "Echoes Level");
+#endif
+    }
+
+    void EnsureRoundCheckpointIfMissing()
+    {
+#if UNITY_EDITOR
+        if (!Application.isPlaying && !buildLayoutInEditMode)
+            return;
+#endif
+        if (GameObject.Find("LevelCheckpoint") != null)
+            return;
+
+        float half = groundTotalWidth * 0.5f;
+        CreateRoundCheckpoint(half, groundY);
+    }
+
+    void CreateRoundCheckpoint(float halfWidth, float groundY)
+    {
+        float x = halfWidth - 4f;
+        GameObject go = new GameObject("LevelCheckpoint");
+        go.layer = 0;
+        go.transform.position = new Vector3(x, groundY + 0.85f, 0f);
+
+        BoxCollider2D box = go.AddComponent<BoxCollider2D>();
+        box.isTrigger = true;
+        box.size = new Vector2(5f, 1.6f);
+
+        go.AddComponent<RoundCheckpoint>();
+
+#if UNITY_EDITOR
+        if (!Application.isPlaying)
+            UnityEditor.Undo.RegisterCreatedObjectUndo(go, "Echoes Level");
+#endif
     }
 
     void EnsureLightBridgeConversionOnExistingPlatforms()
@@ -507,7 +609,9 @@ public class EchoesLevelBootstrap : MonoBehaviour
         for (int i = 0; i < lightBridgeAutoPlatformIndices.Length; i++)
         {
             int idx = lightBridgeAutoPlatformIndices[i];
-            GameObject plat = GameObject.Find($"Platform_Auto_{idx}");
+            GameObject plat = GameObject.Find(GeneratedPlatformName(idx));
+            if (plat == null)
+                plat = GameObject.Find($"Platform_Auto_{idx}");
             if (plat == null)
                 continue;
 

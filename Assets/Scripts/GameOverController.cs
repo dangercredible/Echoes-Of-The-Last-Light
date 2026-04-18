@@ -1,6 +1,7 @@
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
+using UnityEngine.InputSystem;
 
 public class GameOverController : MonoBehaviour
 {
@@ -12,6 +13,10 @@ public class GameOverController : MonoBehaviour
         instance = FindFirstObjectByType<GameOverController>();
         return instance;
     }
+
+    [Header("Input")]
+    [Tooltip("If true, R reloads the scene anytime. If false, R only works after Game Over.")]
+    public bool allowRestartWithRDuringGameplay = true;
 
     [Header("UI")]
     public bool createUIIfMissing = true;
@@ -46,10 +51,13 @@ public class GameOverController : MonoBehaviour
     {
         UpdateHealthHUD();
 
-        if (!gameEnded)
+        if (RoundCompleteController.IsShowing)
             return;
 
-        if (Input.GetKeyDown(KeyCode.R))
+        if (Keyboard.current == null || !Keyboard.current.rKey.wasPressedThisFrame)
+            return;
+
+        if (gameEnded || allowRestartWithRDuringGameplay)
             Restart();
     }
 

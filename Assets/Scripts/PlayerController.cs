@@ -64,9 +64,9 @@ public class PlayerController : MonoBehaviour
     private int lastWallSide;
 
     [Header("Grapple")]
-    public float grappleRange = 10f;
+    public float grappleRange = 5f;
     public float grappleMinRopeLength = 1.5f;
-    public float grappleMaxRopeLength = 12f;
+    public float grappleMaxRopeLength = 6f;
     public float grappleReelSpeed = 8f;
     public float grappleSwingAirControl = 20f;
     public float grappleCooldown = 0.25f;
@@ -751,6 +751,9 @@ public class PlayerController : MonoBehaviour
     public bool IsGliding() => isGliding;
     public bool IsWallSliding() => isWallSliding;
     public bool IsGrappling() => isGrappling;
+
+    public LightGrapplePoint GetActiveGrappleTarget() => grappleTarget;
+
     public float GetGlideStamina() => currentGlideStamina;
     public float GetGlideStaminaNormalized() => maxGlideStamina <= 0f ? 0f : Mathf.Clamp01(currentGlideStamina / maxGlideStamina);
 }
