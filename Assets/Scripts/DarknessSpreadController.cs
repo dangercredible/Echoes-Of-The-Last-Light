@@ -20,8 +20,8 @@ public class DarknessSpreadController : MonoBehaviour
     [Header("Darkness Visual")]
     public float darknessHeight = 20f;
     public float darknessDepth = 0f;
-    public Color fastDarknessColor = new Color(0.05f, 0.03f, 0.1f, 0.78f);
-    public Color slowedDarknessColor = new Color(0.12f, 0.1f, 0.2f, 0.65f);
+    public Color fastDarknessColor = new Color(0.03f, 0.02f, 0.09f, 0.82f);
+    public Color slowedDarknessColor = new Color(0.1f, 0.08f, 0.18f, 0.58f);
     public float colorLerpSpeed = 5f;
     public float pulseSpeed = 2.5f;
     public float pulseAmount = 0.08f;

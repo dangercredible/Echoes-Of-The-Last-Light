@@ -13,14 +13,14 @@ public class LightActivatedPlatform : MonoBehaviour, ILightReactive
     private bool activatedOnce;
 
     [Header("Visual Colors")]
-    public Color enabledColor = new Color(1f, 0.95f, 0.5f, 1f);
-    public Color disabledColor = new Color(0.2f, 0.2f, 0.3f, 0.22f);
+    public Color enabledColor = Color.white;
+    public Color disabledColor = new Color(1f, 1f, 1f, 0.04f);
     public float pulseSpeed = 4.5f;
     public float litPulseStrength = 0.35f;
     public float darkPulseStrength = 0.04f;
     public float litScaleBoost = 1.08f;
     public float stateFlashDuration = 0.15f;
-    public Color flashColor = new Color(1f, 1f, 0.85f, 1f);
+    public Color flashColor = Color.white;
 
     private Vector3 baseScale = Vector3.one;
     private int baseSortingOrder;

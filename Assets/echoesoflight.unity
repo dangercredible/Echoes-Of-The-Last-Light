@@ -251,7 +251,7 @@ Transform:
   m_GameObject: {fileID: 1534551}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -44.23, y: 0.03, z: 0}
+  m_LocalPosition: {x: -44.27, y: -1.75, z: 0}
   m_LocalScale: {x: 3.75, y: 0.45, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -412,14 +412,14 @@ MonoBehaviour:
   visual: {fileID: 14826509}
   startsEnabled: 0
   staysEnabledAfterFirstLight: 0
-  enabledColor: {r: 1, g: 0.95, b: 0.5, a: 1}
-  disabledColor: {r: 0.2, g: 0.2, b: 0.3, a: 0.22}
+  enabledColor: {r: 1, g: 1, b: 1, a: 1}
+  disabledColor: {r: 1, g: 1, b: 1, a: 0.04}
   pulseSpeed: 4.5
   litPulseStrength: 0.35
   darkPulseStrength: 0.04
   litScaleBoost: 1.08
   stateFlashDuration: 0.15
-  flashColor: {r: 1, g: 1, b: 0.85, a: 1}
+  flashColor: {r: 1, g: 1, b: 1, a: 1}
 --- !u!1 &59219481
 GameObject:
   m_ObjectHideFlags: 0
@@ -452,8 +452,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::LightGrapplePoint
   startIlluminated: 0
   indicator: {fileID: 59219483}
-  activeColor: {r: 1, g: 0.95, b: 0.4, a: 1}
-  inactiveColor: {r: 0.35, g: 0.35, b: 0.35, a: 1}
+  activeColor: {r: 1, g: 1, b: 1, a: 1}
+  inactiveColor: {r: 1, g: 1, b: 1, a: 0.12}
 --- !u!212 &59219483
 SpriteRenderer:
   serializedVersion: 2
@@ -566,7 +566,7 @@ Camera:
   m_Enabled: 1
   serializedVersion: 2
   m_ClearFlags: 1
-  m_BackGroundColor: {r: 0.19215687, g: 0.3019608, b: 0.4745098, a: 0}
+  m_BackGroundColor: {r: 0.07, g: 0.05, b: 0.14, a: 0}
   m_projectionMatrixMode: 1
   m_GateFitMode: 2
   m_FOVAxisMode: 0
@@ -882,8 +882,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::LightGrapplePoint
   startIlluminated: 0
   indicator: {fileID: 139464091}
-  activeColor: {r: 1, g: 0.95, b: 0.4, a: 1}
-  inactiveColor: {r: 0.35, g: 0.35, b: 0.35, a: 1}
+  activeColor: {r: 1, g: 1, b: 1, a: 1}
+  inactiveColor: {r: 1, g: 1, b: 1, a: 0.12}
 --- !u!212 &139464091
 SpriteRenderer:
   serializedVersion: 2
@@ -984,7 +984,7 @@ BoxCollider2D:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 156646552}
-  m_Enabled: 0
+  m_Enabled: 1
   serializedVersion: 3
   m_Density: 1
   m_Material: {fileID: 0}
@@ -1113,14 +1113,14 @@ MonoBehaviour:
   visual: {fileID: 156646554}
   startsEnabled: 0
   staysEnabledAfterFirstLight: 0
-  enabledColor: {r: 1, g: 0.95, b: 0.5, a: 1}
-  disabledColor: {r: 0.2, g: 0.2, b: 0.3, a: 0.22}
+  enabledColor: {r: 1, g: 1, b: 1, a: 1}
+  disabledColor: {r: 1, g: 1, b: 1, a: 0.04}
   pulseSpeed: 4.5
   litPulseStrength: 0.35
   darkPulseStrength: 0.04
   litScaleBoost: 1.08
   stateFlashDuration: 0.15
-  flashColor: {r: 1, g: 1, b: 0.85, a: 1}
+  flashColor: {r: 1, g: 1, b: 1, a: 1}
 --- !u!1 &170640068
 GameObject:
   m_ObjectHideFlags: 0
@@ -1291,8 +1291,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::LightGrapplePoint
   startIlluminated: 0
   indicator: {fileID: 196310839}
-  activeColor: {r: 1, g: 0.95, b: 0.4, a: 1}
-  inactiveColor: {r: 0.35, g: 0.35, b: 0.35, a: 1}
+  activeColor: {r: 1, g: 1, b: 1, a: 1}
+  inactiveColor: {r: 1, g: 1, b: 1, a: 0.12}
 --- !u!212 &196310839
 SpriteRenderer:
   serializedVersion: 2
@@ -1399,8 +1399,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::LightGrapplePoint
   startIlluminated: 0
   indicator: {fileID: 242629730}
-  activeColor: {r: 1, g: 0.95, b: 0.4, a: 1}
-  inactiveColor: {r: 0.35, g: 0.35, b: 0.35, a: 1}
+  activeColor: {r: 1, g: 1, b: 1, a: 1}
+  inactiveColor: {r: 1, g: 1, b: 1, a: 0.12}
 --- !u!212 &242629730
 SpriteRenderer:
   serializedVersion: 2
@@ -1507,8 +1507,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::LightGrapplePoint
   startIlluminated: 0
   indicator: {fileID: 250585980}
-  activeColor: {r: 1, g: 0.95, b: 0.4, a: 1}
-  inactiveColor: {r: 0.35, g: 0.35, b: 0.35, a: 1}
+  activeColor: {r: 1, g: 1, b: 1, a: 1}
+  inactiveColor: {r: 1, g: 1, b: 1, a: 0.12}
 --- !u!212 &250585980
 SpriteRenderer:
   serializedVersion: 2
@@ -1577,7 +1577,7 @@ Transform:
   m_GameObject: {fileID: 250585978}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -45.97, y: 7.4, z: 0}
+  m_LocalPosition: {x: -45.65, y: 4.11, z: 0}
   m_LocalScale: {x: 0.3, y: 0.3, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -1830,14 +1830,14 @@ MonoBehaviour:
   visual: {fileID: 252312977}
   startsEnabled: 0
   staysEnabledAfterFirstLight: 0
-  enabledColor: {r: 1, g: 0.95, b: 0.5, a: 1}
-  disabledColor: {r: 0.2, g: 0.2, b: 0.3, a: 0.22}
+  enabledColor: {r: 1, g: 1, b: 1, a: 1}
+  disabledColor: {r: 1, g: 1, b: 1, a: 0.04}
   pulseSpeed: 4.5
   litPulseStrength: 0.35
   darkPulseStrength: 0.04
   litScaleBoost: 1.08
   stateFlashDuration: 0.15
-  flashColor: {r: 1, g: 1, b: 0.85, a: 1}
+  flashColor: {r: 1, g: 1, b: 1, a: 1}
 --- !u!1 &255110769
 GameObject:
   m_ObjectHideFlags: 0
@@ -2008,8 +2008,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::LightGrapplePoint
   startIlluminated: 0
   indicator: {fileID: 275103111}
-  activeColor: {r: 1, g: 0.95, b: 0.4, a: 1}
-  inactiveColor: {r: 0.35, g: 0.35, b: 0.35, a: 1}
+  activeColor: {r: 1, g: 1, b: 1, a: 1}
+  inactiveColor: {r: 1, g: 1, b: 1, a: 0.12}
 --- !u!212 &275103111
 SpriteRenderer:
   serializedVersion: 2
@@ -2239,14 +2239,14 @@ MonoBehaviour:
   visual: {fileID: 290644337}
   startsEnabled: 0
   staysEnabledAfterFirstLight: 0
-  enabledColor: {r: 1, g: 0.95, b: 0.5, a: 1}
-  disabledColor: {r: 0.2, g: 0.2, b: 0.3, a: 0.22}
+  enabledColor: {r: 1, g: 1, b: 1, a: 1}
+  disabledColor: {r: 1, g: 1, b: 1, a: 0.04}
   pulseSpeed: 4.5
   litPulseStrength: 0.35
   darkPulseStrength: 0.04
   litScaleBoost: 1.08
   stateFlashDuration: 0.15
-  flashColor: {r: 1, g: 1, b: 0.85, a: 1}
+  flashColor: {r: 1, g: 1, b: 1, a: 1}
 --- !u!1 &332277070
 GameObject:
   m_ObjectHideFlags: 0
@@ -2279,8 +2279,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::LightGrapplePoint
   startIlluminated: 0
   indicator: {fileID: 332277072}
-  activeColor: {r: 1, g: 0.95, b: 0.4, a: 1}
-  inactiveColor: {r: 0.35, g: 0.35, b: 0.35, a: 1}
+  activeColor: {r: 1, g: 1, b: 1, a: 1}
+  inactiveColor: {r: 1, g: 1, b: 1, a: 0.12}
 --- !u!212 &332277072
 SpriteRenderer:
   serializedVersion: 2
@@ -2525,8 +2525,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::LightGrapplePoint
   startIlluminated: 0
   indicator: {fileID: 378204370}
-  activeColor: {r: 1, g: 0.95, b: 0.4, a: 1}
-  inactiveColor: {r: 0.35, g: 0.35, b: 0.35, a: 1}
+  activeColor: {r: 1, g: 1, b: 1, a: 1}
+  inactiveColor: {r: 1, g: 1, b: 1, a: 0.12}
 --- !u!212 &378204370
 SpriteRenderer:
   serializedVersion: 2
@@ -2877,6 +2877,97 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &438457755
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 438457758}
+  - component: {fileID: 438457757}
+  - component: {fileID: 438457756}
+  m_Layer: 0
+  m_Name: LevelCheckpoint
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &438457756
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 438457755}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a5800eb25208cf048a26ff83efba7a56, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::RoundCheckpoint
+--- !u!61 &438457757
+BoxCollider2D:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 438457755}
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Density: 1
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_ForceSendLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_ForceReceiveLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_ContactCaptureLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_CallbackLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_IsTrigger: 1
+  m_UsedByEffector: 0
+  m_CompositeOperation: 0
+  m_CompositeOrder: 0
+  m_Offset: {x: 0, y: 0}
+  m_SpriteTilingProperty:
+    border: {x: 0, y: 0, z: 0, w: 0}
+    pivot: {x: 0, y: 0}
+    oldSize: {x: 0, y: 0}
+    newSize: {x: 0, y: 0}
+    adaptiveTilingThreshold: 0
+    drawMode: 0
+    adaptiveTiling: 0
+  m_AutoTiling: 0
+  m_Size: {x: 5, y: 1.6}
+  m_EdgeRadius: 0
+--- !u!4 &438457758
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 438457755}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 51, y: -3.15, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &588726112
 GameObject:
   m_ObjectHideFlags: 0
@@ -2909,8 +3000,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::LightGrapplePoint
   startIlluminated: 0
   indicator: {fileID: 588726114}
-  activeColor: {r: 1, g: 0.95, b: 0.4, a: 1}
-  inactiveColor: {r: 0.35, g: 0.35, b: 0.35, a: 1}
+  activeColor: {r: 1, g: 1, b: 1, a: 1}
+  inactiveColor: {r: 1, g: 1, b: 1, a: 0.12}
 --- !u!212 &588726114
 SpriteRenderer:
   serializedVersion: 2
@@ -3014,6 +3105,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 87bda579a3ef5f84ba06f87e56f808a2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::GameOverController
+  allowRestartWithRDuringGameplay: 1
   createUIIfMissing: 1
   titleText: GAME OVER
   restartHint: Press R to Restart
@@ -3297,9 +3389,9 @@ MonoBehaviour:
   wallJumpMaxRisingSpeed: 0.65
   wallSlideRequiresHoldTowardWall: 1
   wallPushHoldDeadzone: 0.12
-  grappleRange: 16
+  grappleRange: 8
   grappleMinRopeLength: 1.5
-  grappleMaxRopeLength: 12
+  grappleMaxRopeLength: 6
   grappleReelSpeed: 8
   grappleSwingAirControl: 20
   grappleCooldown: 0.25
@@ -3311,7 +3403,7 @@ MonoBehaviour:
   grappleLineSegments: 18
   ropeSag: 0.75
   grappleLineWidth: 0.06
-  grappleLineColor: {r: 1, g: 0.95, b: 0.65, a: 0.95}
+  grappleLineColor: {r: 0.85, g: 0.9, b: 1, a: 0.95}
   grappleDetachInertiaMultiplier: 1.12
   grappleDetachMinHorizontalSpeed: 4.5
   lantern: {fileID: 726960824}
@@ -3335,7 +3427,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0b97aa4a76ab4da4a9936ec606560e4b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::LightLantern
-  startsOn: 1
+  startsOn: 0
   lightRadius: 6
   affectedLayers:
     serializedVersion: 2
@@ -3343,8 +3435,8 @@ MonoBehaviour:
   visualsToToggle: []
   moodRenderers:
   - {fileID: 726960820}
-  lightModeTint: {r: 1, g: 0.95, b: 0.82, a: 1}
-  darkModeTint: {r: 0.55, g: 0.62, b: 0.8, a: 1}
+  lightModeTint: {r: 0.92, g: 0.9, b: 1, a: 1}
+  darkModeTint: {r: 0.38, g: 0.42, b: 0.58, a: 1}
   tintLerpSpeed: 8
   auraVisual: {fileID: 0}
   auraPulseSpeed: 4
@@ -3373,8 +3465,8 @@ MonoBehaviour:
   catchBuffer: 0.35
   darknessHeight: 20
   darknessDepth: 0
-  fastDarknessColor: {r: 0.05, g: 0.03, b: 0.1, a: 0.78}
-  slowedDarknessColor: {r: 0.12, g: 0.1, b: 0.2, a: 0.65}
+  fastDarknessColor: {r: 0.03, g: 0.02, b: 0.09, a: 0.82}
+  slowedDarknessColor: {r: 0.1, g: 0.08, b: 0.18, a: 0.58}
   colorLerpSpeed: 5
   pulseSpeed: 2.5
   pulseAmount: 0.08
@@ -3577,8 +3669,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::LightGrapplePoint
   startIlluminated: 0
   indicator: {fileID: 799907528}
-  activeColor: {r: 1, g: 0.95, b: 0.4, a: 1}
-  inactiveColor: {r: 0.35, g: 0.35, b: 0.35, a: 1}
+  activeColor: {r: 1, g: 1, b: 1, a: 1}
+  inactiveColor: {r: 1, g: 1, b: 1, a: 0.12}
 --- !u!212 &799907528
 SpriteRenderer:
   serializedVersion: 2
@@ -3685,8 +3777,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::LightGrapplePoint
   startIlluminated: 0
   indicator: {fileID: 802099490}
-  activeColor: {r: 1, g: 0.95, b: 0.4, a: 1}
-  inactiveColor: {r: 0.35, g: 0.35, b: 0.35, a: 1}
+  activeColor: {r: 1, g: 1, b: 1, a: 1}
+  inactiveColor: {r: 1, g: 1, b: 1, a: 0.12}
 --- !u!212 &802099490
 SpriteRenderer:
   serializedVersion: 2
@@ -3788,8 +3880,8 @@ Transform:
   m_GameObject: {fileID: 910000001}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -12.4406, y: 0.5438, z: 0}
-  m_LocalScale: {x: 3.8812, y: 13.0872, z: 1}
+  m_LocalPosition: {x: -11.2837, y: -1.0358, z: 0}
+  m_LocalScale: {x: 6.1951714, y: 9.92795, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
@@ -3844,7 +3936,7 @@ SpriteRenderer:
   m_SortingOrder: 0
   m_MaskInteraction: 0
   m_Sprite: {fileID: 7482667652216324306, guid: 311925a002f4447b3a28927169b83ea6, type: 3}
-  m_Color: {r: 0.32, g: 0.32, b: 0.4, a: 1}
+  m_Color: {r: 0.26, g: 0.2, b: 0.4, a: 1}
   m_FlipX: 0
   m_FlipY: 0
   m_DrawMode: 0
@@ -4397,7 +4489,7 @@ SpriteRenderer:
   m_SortingOrder: 0
   m_MaskInteraction: 0
   m_Sprite: {fileID: 7482667652216324306, guid: 311925a002f4447b3a28927169b83ea6, type: 3}
-  m_Color: {r: 0.21960784, g: 0.21960784, b: 0.21960784, a: 0.35}
+  m_Color: {r: 1, g: 1, b: 1, a: 0.06}
   m_FlipX: 0
   m_FlipY: 0
   m_DrawMode: 0
@@ -4468,14 +4560,14 @@ MonoBehaviour:
   visual: {fileID: 910000043}
   startsEnabled: 0
   staysEnabledAfterFirstLight: 0
-  enabledColor: {r: 1, g: 0.95, b: 0.5, a: 1}
-  disabledColor: {r: 0.2, g: 0.2, b: 0.3, a: 0.22}
+  enabledColor: {r: 1, g: 1, b: 1, a: 1}
+  disabledColor: {r: 1, g: 1, b: 1, a: 0.04}
   pulseSpeed: 4.5
   litPulseStrength: 0.35
   darkPulseStrength: 0.04
   litScaleBoost: 1.08
   stateFlashDuration: 0.15
-  flashColor: {r: 1, g: 1, b: 0.85, a: 1}
+  flashColor: {r: 1, g: 1, b: 1, a: 1}
 --- !u!1 &910000051
 GameObject:
   m_ObjectHideFlags: 0
@@ -4560,7 +4652,7 @@ SpriteRenderer:
   m_SortingOrder: 0
   m_MaskInteraction: 0
   m_Sprite: {fileID: 7482667652216324306, guid: 311925a002f4447b3a28927169b83ea6, type: 3}
-  m_Color: {r: 0.21960784, g: 0.21960784, b: 0.21960784, a: 0.35}
+  m_Color: {r: 1, g: 1, b: 1, a: 0.06}
   m_FlipX: 0
   m_FlipY: 0
   m_DrawMode: 0
@@ -4631,14 +4723,14 @@ MonoBehaviour:
   visual: {fileID: 910000053}
   startsEnabled: 0
   staysEnabledAfterFirstLight: 1
-  enabledColor: {r: 1, g: 0.95, b: 0.5, a: 1}
-  disabledColor: {r: 0.2, g: 0.2, b: 0.3, a: 0.22}
+  enabledColor: {r: 1, g: 1, b: 1, a: 1}
+  disabledColor: {r: 1, g: 1, b: 1, a: 0.04}
   pulseSpeed: 4.5
   litPulseStrength: 0.35
   darkPulseStrength: 0.04
   litScaleBoost: 1.08
   stateFlashDuration: 0.15
-  flashColor: {r: 1, g: 1, b: 0.85, a: 1}
+  flashColor: {r: 1, g: 1, b: 1, a: 1}
 --- !u!1 &910000061
 GameObject:
   m_ObjectHideFlags: 0
@@ -4745,8 +4837,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::LightGrapplePoint
   startIlluminated: 0
   indicator: {fileID: 910000063}
-  activeColor: {r: 1, g: 0.95, b: 0.4, a: 1}
-  inactiveColor: {r: 0.35, g: 0.35, b: 0.35, a: 1}
+  activeColor: {r: 1, g: 1, b: 1, a: 1}
+  inactiveColor: {r: 1, g: 1, b: 1, a: 0.12}
 --- !u!1 &910000071
 GameObject:
   m_ObjectHideFlags: 0
@@ -4853,8 +4945,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::LightGrapplePoint
   startIlluminated: 0
   indicator: {fileID: 910000073}
-  activeColor: {r: 1, g: 0.95, b: 0.4, a: 1}
-  inactiveColor: {r: 0.35, g: 0.35, b: 0.35, a: 1}
+  activeColor: {r: 1, g: 1, b: 1, a: 1}
+  inactiveColor: {r: 1, g: 1, b: 1, a: 0.12}
 --- !u!1 &910000081
 GameObject:
   m_ObjectHideFlags: 0
@@ -4961,8 +5053,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::LightGrapplePoint
   startIlluminated: 0
   indicator: {fileID: 910000083}
-  activeColor: {r: 1, g: 0.95, b: 0.4, a: 1}
-  inactiveColor: {r: 0.35, g: 0.35, b: 0.35, a: 1}
+  activeColor: {r: 1, g: 1, b: 1, a: 1}
+  inactiveColor: {r: 1, g: 1, b: 1, a: 0.12}
 --- !u!1 &910000090
 GameObject:
   m_ObjectHideFlags: 0
@@ -5011,7 +5103,7 @@ MonoBehaviour:
   pitWidth: 9
   pitCenterX: 36
   groundY: -4
-  extraPlatformColumns: 28
+  extraPlatformColumns: 36
   extraPlatformSpacing: 6.5
   extraPlatformMinY: -1.5
   extraPlatformMaxY: 30
@@ -5026,6 +5118,7 @@ MonoBehaviour:
   spawnInsetFromLeftEdge: 4
   playerSpawnYOffsetFromGround: 1.12
   lightBridgeAutoPlatformIndices: 07000000090000000f0000001000000013000000
+  bouncyPlatformIndices: 030000000c00000014000000
   buildLayoutInEditMode: 1
   cachedGroundSpriteForRebuild: {fileID: 7482667652216324306, guid: 311925a002f4447b3a28927169b83ea6, type: 3}
 --- !u!1 &1015551604
@@ -5198,8 +5291,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::LightGrapplePoint
   startIlluminated: 0
   indicator: {fileID: 1068981979}
-  activeColor: {r: 1, g: 0.95, b: 0.4, a: 1}
-  inactiveColor: {r: 0.35, g: 0.35, b: 0.35, a: 1}
+  activeColor: {r: 1, g: 1, b: 1, a: 1}
+  inactiveColor: {r: 1, g: 1, b: 1, a: 0.12}
 --- !u!212 &1068981979
 SpriteRenderer:
   serializedVersion: 2
@@ -5406,7 +5499,7 @@ Transform:
   m_GameObject: {fileID: 1135945654}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -49.55, y: 2.72, z: 0}
+  m_LocalPosition: {x: -49.59, y: 0.94000006, z: 0}
   m_LocalScale: {x: 1.8, y: 0.45, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -5858,8 +5951,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::LightGrapplePoint
   startIlluminated: 0
   indicator: {fileID: 1427250972}
-  activeColor: {r: 1, g: 0.95, b: 0.4, a: 1}
-  inactiveColor: {r: 0.35, g: 0.35, b: 0.35, a: 1}
+  activeColor: {r: 1, g: 1, b: 1, a: 1}
+  inactiveColor: {r: 1, g: 1, b: 1, a: 0.12}
 --- !u!212 &1427250972
 SpriteRenderer:
   serializedVersion: 2
@@ -6342,8 +6435,8 @@ Transform:
   m_GameObject: {fileID: 1753602208}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -40.1563, y: -0.8488, z: 0}
-  m_LocalScale: {x: 1.5762, y: 10.3026, z: 1}
+  m_LocalPosition: {x: -40.1563, y: -2.028, z: 0}
+  m_LocalScale: {x: 1.5762, y: 7.9437137, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
@@ -6380,8 +6473,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::LightGrapplePoint
   startIlluminated: 0
   indicator: {fileID: 1755717152}
-  activeColor: {r: 1, g: 0.95, b: 0.4, a: 1}
-  inactiveColor: {r: 0.35, g: 0.35, b: 0.35, a: 1}
+  activeColor: {r: 1, g: 1, b: 1, a: 1}
+  inactiveColor: {r: 1, g: 1, b: 1, a: 0.12}
 --- !u!212 &1755717152
 SpriteRenderer:
   serializedVersion: 2
@@ -6611,14 +6704,14 @@ MonoBehaviour:
   visual: {fileID: 1784668874}
   startsEnabled: 0
   staysEnabledAfterFirstLight: 0
-  enabledColor: {r: 1, g: 0.95, b: 0.5, a: 1}
-  disabledColor: {r: 0.2, g: 0.2, b: 0.3, a: 0.22}
+  enabledColor: {r: 1, g: 1, b: 1, a: 1}
+  disabledColor: {r: 1, g: 1, b: 1, a: 0.04}
   pulseSpeed: 4.5
   litPulseStrength: 0.35
   darkPulseStrength: 0.04
   litScaleBoost: 1.08
   stateFlashDuration: 0.15
-  flashColor: {r: 1, g: 1, b: 0.85, a: 1}
+  flashColor: {r: 1, g: 1, b: 1, a: 1}
 --- !u!1 &1806329326
 GameObject:
   m_ObjectHideFlags: 0
@@ -6895,6 +6988,54 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &1999558792
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1999558794}
+  - component: {fileID: 1999558793}
+  m_Layer: 0
+  m_Name: RoundCompleteController
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &1999558793
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1999558792}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3ac9dae66841e3e4ab9f39ed45222d9e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::RoundCompleteController
+  createUIIfMissing: 1
+  titleText: ROUND COMPLETE
+  bodyText: You reached the end of the path.
+  hintText: Press R to play again
+--- !u!4 &1999558794
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1999558792}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0
@@ -6951,3 +7092,5 @@ SceneRoots:
   - {fileID: 139464092}
   - {fileID: 588726115}
   - {fileID: 699380318}
+  - {fileID: 1999558794}
+  - {fileID: 438457758}

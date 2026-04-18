@@ -11,8 +11,8 @@ public class LightGrapplePoint : MonoBehaviour, ILightReactive
 
     [Header("Visual")]
     public SpriteRenderer indicator;
-    public Color activeColor = new Color(1f, 0.95f, 0.4f, 1f);
-    public Color inactiveColor = new Color(0.35f, 0.35f, 0.35f, 1f);
+    public Color activeColor = Color.white;
+    public Color inactiveColor = new Color(1f, 1f, 1f, 0.12f);
 
     void Awake()
     {
