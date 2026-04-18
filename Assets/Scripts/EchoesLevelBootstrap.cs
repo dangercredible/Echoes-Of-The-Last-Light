@@ -51,6 +51,10 @@ public class EchoesLevelBootstrap : MonoBehaviour
     [Tooltip("Player transform Y so feet sit on the main floor (ground center Y + this).")]
     public float playerSpawnYOffsetFromGround = 1.12f;
 
+    [Header("Light bridges (auto platforms)")]
+    [Tooltip("Indices i for Platform_Auto_i that become LightActivatedPlatform bridges (copy style from Platform_LightBridge_A).")]
+    public int[] lightBridgeAutoPlatformIndices = { 7, 9, 15, 16, 19 };
+
     [Header("Editor")]
     [Tooltip("When on, the level is generated in Edit Mode so you can see it in the Scene view. Uses the original Ground sprite once, then the cached sprite below if Ground is already gone.")]
     public bool buildLayoutInEditMode = true;
@@ -299,6 +303,11 @@ public class EchoesLevelBootstrap : MonoBehaviour
 
     void SpawnExtraPlatforms(Sprite sprite, float halfWidth, float pitMin, float pitMax)
     {
+        LightActivatedPlatform lightBridgeTemplate = null;
+        GameObject lightBridgeObject = GameObject.Find("Platform_LightBridge_A");
+        if (lightBridgeObject != null)
+            lightBridgeTemplate = lightBridgeObject.GetComponent<LightActivatedPlatform>();
+
         float pitAvoidHalf = (pitMax - pitMin) * 0.5f + 4f;
         int columns = Mathf.Max(0, extraPlatformColumns);
         for (int i = 0; i < columns; i++)
@@ -314,8 +323,68 @@ public class EchoesLevelBootstrap : MonoBehaviour
             y = Mathf.Clamp(y + wave * 0.35f, extraPlatformMinY, extraPlatformMaxY);
 
             float w = 1.8f + (i % 4) * 0.65f;
-            CreateGroundChunk($"Platform_Auto_{i}", sprite, new Vector3(x, y, 0f), new Vector3(w, 0.45f, 1f), 6);
+            Vector3 position = new Vector3(x, y, 0f);
+            Vector3 scale = new Vector3(w, 0.45f, 1f);
+
+            if (AutoPlatformIndexIsLightBridge(i))
+                CreateLightBridgePlatform(lightBridgeTemplate, sprite, position, scale, 6, i);
+            else
+                CreateGroundChunk($"Platform_Auto_{i}", sprite, position, scale, 6);
         }
+    }
+
+    bool AutoPlatformIndexIsLightBridge(int index)
+    {
+        if (lightBridgeAutoPlatformIndices == null)
+            return false;
+        for (int j = 0; j < lightBridgeAutoPlatformIndices.Length; j++)
+        {
+            if (lightBridgeAutoPlatformIndices[j] == index)
+                return true;
+        }
+        return false;
+    }
+
+    void CreateLightBridgePlatform(LightActivatedPlatform template, Sprite fallbackSprite, Vector3 position, Vector3 scale, int layer, int index)
+    {
+        if (template == null)
+        {
+            CreateGroundChunk($"Platform_Auto_{index}", fallbackSprite, position, scale, layer);
+            return;
+        }
+
+        GameObject chunk = new GameObject($"Platform_Auto_{index}");
+        chunk.layer = layer;
+        chunk.transform.position = position;
+        chunk.transform.localScale = scale;
+
+        SpriteRenderer renderer = chunk.AddComponent<SpriteRenderer>();
+        renderer.sprite = template.visual != null && template.visual.sprite != null ? template.visual.sprite : fallbackSprite;
+        renderer.sortingLayerID = template.visual != null ? template.visual.sortingLayerID : 0;
+        renderer.sortingOrder = template.visual != null ? template.visual.sortingOrder : 0;
+        renderer.color = template.disabledColor;
+
+        BoxCollider2D solid = chunk.AddComponent<BoxCollider2D>();
+        solid.size = Vector2.one;
+
+        LightActivatedPlatform bridge = chunk.AddComponent<LightActivatedPlatform>();
+        bridge.solidCollider = solid;
+        bridge.visual = renderer;
+        bridge.startsEnabled = template.startsEnabled;
+        bridge.staysEnabledAfterFirstLight = template.staysEnabledAfterFirstLight;
+        bridge.enabledColor = template.enabledColor;
+        bridge.disabledColor = template.disabledColor;
+        bridge.pulseSpeed = template.pulseSpeed;
+        bridge.litPulseStrength = template.litPulseStrength;
+        bridge.darkPulseStrength = template.darkPulseStrength;
+        bridge.litScaleBoost = template.litScaleBoost;
+        bridge.stateFlashDuration = template.stateFlashDuration;
+        bridge.flashColor = template.flashColor;
+
+#if UNITY_EDITOR
+        if (!Application.isPlaying)
+            UnityEditor.Undo.RegisterCreatedObjectUndo(chunk, "Echoes Level");
+#endif
     }
 
     void SpawnExtraGrapplePoints(float halfWidth, float pitMin, float pitMax)

@@ -4956,6 +4956,12 @@ MonoBehaviour:
   movePlayerToFarLeftOnBuild: 1
   spawnInsetFromLeftEdge: 4
   playerSpawnYOffsetFromGround: 1.12
+  lightBridgeAutoPlatformIndices:
+  - 7
+  - 9
+  - 15
+  - 16
+  - 19
   buildLayoutInEditMode: 1
   cachedGroundSpriteForRebuild: {fileID: 7482667652216324306, guid: 311925a002f4447b3a28927169b83ea6, type: 3}
 --- !u!1 &1015551604
