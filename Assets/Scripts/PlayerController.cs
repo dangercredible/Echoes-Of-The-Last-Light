@@ -50,6 +50,11 @@ public class PlayerController : MonoBehaviour
     public float wallJumpMoveLockTime = 0.15f;
     public float wallCoyoteTime = 0.12f;
     public float wallStickTime = 0.15f;
+    [Tooltip("Wall jump triggers while moving up slower than this (lets you jump off shortly after pushing away).")]
+    public float wallJumpMaxRisingSpeed = 0.65f;
+    [Tooltip("If true, you only wall-slide when holding toward the wall (common 2D platformer feel).")]
+    public bool wallSlideRequiresHoldTowardWall = true;
+    public float wallPushHoldDeadzone = 0.12f;
     private bool isTouchingWall;
     private bool isWallSliding;
     private int wallSide;
@@ -325,26 +330,42 @@ public class PlayerController : MonoBehaviour
 
         Bounds bounds = capsuleCollider.bounds;
         Vector2 center = bounds.center;
+        float halfHeight = Mathf.Clamp(bounds.extents.y * 0.82f, 0.08f, 3f);
+        Vector2 upper = center + Vector2.up * halfHeight;
+        Vector2 lower = center - Vector2.up * halfHeight;
         float castDistance = wallCheckDistance + 0.02f;
 
-        int hitLeftCount = Physics2D.Raycast(center, Vector2.left, wallFilter, wallHits, castDistance);
-        if (hitLeftCount > 0)
+        bool hitLeft = WallRayHit(lower, Vector2.left, castDistance)
+            || WallRayHit(center, Vector2.left, castDistance)
+            || WallRayHit(upper, Vector2.left, castDistance);
+        bool hitRight = WallRayHit(lower, Vector2.right, castDistance)
+            || WallRayHit(center, Vector2.right, castDistance)
+            || WallRayHit(upper, Vector2.right, castDistance);
+
+        if (hitLeft && hitRight)
+        {
+            isTouchingWall = true;
+            if (Mathf.Abs(moveInput.x) > 0.05f)
+                wallSide = moveInput.x > 0f ? 1 : -1;
+            else if (Mathf.Abs(rb.linearVelocity.x) > 0.05f)
+                wallSide = rb.linearVelocity.x > 0f ? 1 : -1;
+            else
+                wallSide = facingRight ? 1 : -1;
+        }
+        else if (hitLeft)
         {
             isTouchingWall = true;
             wallSide = -1;
-            lastWallSide = wallSide;
         }
-
-        int hitRightCount = Physics2D.Raycast(center, Vector2.right, wallFilter, wallHits, castDistance);
-        if (hitRightCount > 0)
+        else if (hitRight)
         {
             isTouchingWall = true;
             wallSide = 1;
-            lastWallSide = wallSide;
         }
 
         if (isTouchingWall)
         {
+            lastWallSide = wallSide;
             wallCoyoteCounter = wallCoyoteTime;
             if (moveInput.x * wallSide > 0.1f)
                 wallStickCounter = wallStickTime;
@@ -355,9 +376,16 @@ public class PlayerController : MonoBehaviour
             wallStickCounter -= Time.deltaTime;
         }
 
+        bool pushIntoWall = isTouchingWall && moveInput.x * wallSide > wallPushHoldDeadzone;
         bool hasWallGrace = wallCoyoteCounter > 0f && lastWallSide != 0;
-        if ((isTouchingWall || hasWallGrace) && rb.linearVelocity.y < 0f && !isGrounded)
+        bool slideInputOk = !wallSlideRequiresHoldTowardWall || pushIntoWall;
+        if ((isTouchingWall || hasWallGrace) && rb.linearVelocity.y < 0f && !isGrounded && slideInputOk)
             isWallSliding = true;
+    }
+
+    bool WallRayHit(Vector2 origin, Vector2 direction, float distance)
+    {
+        return Physics2D.Raycast(origin, direction, wallFilter, wallHits, distance) > 0;
     }
 
     void UpdateTimers()
@@ -365,8 +393,6 @@ public class PlayerController : MonoBehaviour
         jumpBufferCounter -= Time.deltaTime;
         grappleCooldownTimer -= Time.deltaTime;
         wallJumpMoveLockTimer -= Time.deltaTime;
-        wallCoyoteCounter -= Time.deltaTime;
-        wallStickCounter -= Time.deltaTime;
 
         if (isDashing)
         {
@@ -401,7 +427,11 @@ public class PlayerController : MonoBehaviour
         if (jumpBufferCounter <= 0f)
             return;
 
-        if (isWallSliding && !isGrounded && (isTouchingWall || wallCoyoteCounter > 0f))
+        bool wallJumpReady = !isGrounded
+            && (isTouchingWall || wallCoyoteCounter > 0f)
+            && rb.linearVelocity.y <= wallJumpMaxRisingSpeed;
+
+        if (wallJumpReady)
         {
             WallJump();
             jumpBufferCounter = 0f;
@@ -704,9 +734,15 @@ public class PlayerController : MonoBehaviour
     public void Die()
     {
         StopSlide();
+        StopGrapple();
         isDashing = false;
         isGliding = false;
+        isWallSliding = false;
+        wallJumpMoveLockTimer = 0f;
+        wallCoyoteCounter = 0f;
+        wallStickCounter = 0f;
         rb.gravityScale = baseGravityScale;
+        rb.linearVelocity = Vector2.zero;
     }
 
     public bool IsGrounded() => isGrounded;

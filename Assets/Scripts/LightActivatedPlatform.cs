@@ -38,6 +38,39 @@ public class LightActivatedPlatform : MonoBehaviour, ILightReactive
             baseScale = visual.transform.localScale;
             baseSortingOrder = visual.sortingOrder;
         }
+
+        EnsureLightOverlapCollider();
+    }
+
+    void EnsureLightOverlapCollider()
+    {
+        if (solidCollider == null)
+            return;
+
+        foreach (Collider2D existing in GetComponents<Collider2D>())
+        {
+            if (existing != null && existing != solidCollider && existing.isTrigger)
+                return;
+        }
+
+        BoxCollider2D sensor = gameObject.AddComponent<BoxCollider2D>();
+        sensor.isTrigger = true;
+        sensor.enabled = true;
+
+        if (solidCollider is BoxCollider2D boxSolid)
+        {
+            sensor.offset = boxSolid.offset;
+            sensor.size = boxSolid.size;
+        }
+        else
+        {
+            Bounds worldBounds = solidCollider.bounds;
+            Vector2 localCenter = transform.InverseTransformPoint(worldBounds.center);
+            float sx = Mathf.Abs(transform.lossyScale.x) > 0.0001f ? transform.lossyScale.x : 1f;
+            float sy = Mathf.Abs(transform.lossyScale.y) > 0.0001f ? transform.lossyScale.y : 1f;
+            sensor.offset = localCenter;
+            sensor.size = new Vector2(worldBounds.size.x / sx, worldBounds.size.y / sy);
+        }
     }
 
     void Start()

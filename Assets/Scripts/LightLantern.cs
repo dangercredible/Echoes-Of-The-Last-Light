@@ -25,7 +25,7 @@ public class LightLantern : MonoBehaviour
     void Start()
     {
         if (moodRenderers == null || moodRenderers.Length == 0)
-            moodRenderers = GetComponentsInParent<SpriteRenderer>();
+            moodRenderers = GetComponentsInParent<SpriteRenderer>(true);
 
         if (auraVisual != null)
             auraBaseScale = auraVisual.localScale;
@@ -38,14 +38,12 @@ public class LightLantern : MonoBehaviour
         if (!IsOn)
             return;
 
-        Collider2D[] hits = Physics2D.OverlapCircleAll(transform.position, lightRadius, affectedLayers);
-        if (hits.Length == 0)
-            hits = Physics2D.OverlapCircleAll(transform.position, lightRadius);
+        Collider2D[] hits = GetOverlapHits();
         HashSet<ILightReactive> currentFrame = new HashSet<ILightReactive>();
 
         for (int i = 0; i < hits.Length; i++)
         {
-            MonoBehaviour[] behaviours = hits[i].GetComponents<MonoBehaviour>();
+            MonoBehaviour[] behaviours = hits[i].GetComponentsInParent<MonoBehaviour>(true);
             for (int b = 0; b < behaviours.Length; b++)
             {
                 if (behaviours[b] is ILightReactive reactive)
@@ -83,10 +81,13 @@ public class LightLantern : MonoBehaviour
     {
         IsOn = enabledState;
 
-        for (int i = 0; i < visualsToToggle.Length; i++)
+        if (visualsToToggle != null)
         {
-            if (visualsToToggle[i] != null)
-                visualsToToggle[i].enabled = enabledState;
+            for (int i = 0; i < visualsToToggle.Length; i++)
+            {
+                if (visualsToToggle[i] != null)
+                    visualsToToggle[i].enabled = enabledState;
+            }
         }
 
         if (!enabledState)
@@ -121,6 +122,9 @@ public class LightLantern : MonoBehaviour
 
     void UpdateMoodVisuals()
     {
+        if (moodRenderers == null || moodRenderers.Length == 0)
+            return;
+
         Color targetTint = IsOn ? lightModeTint : darkModeTint;
         for (int i = 0; i < moodRenderers.Length; i++)
         {
@@ -137,15 +141,26 @@ public class LightLantern : MonoBehaviour
         }
     }
 
+    Collider2D[] GetOverlapHits()
+    {
+        if (affectedLayers.value != 0)
+        {
+            Collider2D[] masked = Physics2D.OverlapCircleAll(transform.position, lightRadius, affectedLayers);
+            if (masked.Length == 0)
+                return Physics2D.OverlapCircleAll(transform.position, lightRadius);
+            return masked;
+        }
+
+        return Physics2D.OverlapCircleAll(transform.position, lightRadius);
+    }
+
     void IlluminateInRange()
     {
-        Collider2D[] hits = Physics2D.OverlapCircleAll(transform.position, lightRadius, affectedLayers);
-        if (hits.Length == 0)
-            hits = Physics2D.OverlapCircleAll(transform.position, lightRadius);
+        Collider2D[] hits = GetOverlapHits();
 
         for (int i = 0; i < hits.Length; i++)
         {
-            MonoBehaviour[] behaviours = hits[i].GetComponents<MonoBehaviour>();
+            MonoBehaviour[] behaviours = hits[i].GetComponentsInParent<MonoBehaviour>(true);
             for (int b = 0; b < behaviours.Length; b++)
             {
                 if (behaviours[b] is ILightReactive reactive)

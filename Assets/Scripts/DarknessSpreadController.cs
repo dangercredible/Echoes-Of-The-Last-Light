@@ -58,6 +58,21 @@ public class DarknessSpreadController : MonoBehaviour
         EnsureDarknessVisual();
     }
 
+    void Start()
+    {
+        if (!Application.isPlaying)
+            return;
+        if (player == null)
+            return;
+
+        float marginBehindPlayer = 22f;
+        if (player.position.x <= darknessFrontX + catchBuffer)
+        {
+            darknessFrontX = player.position.x - marginBehindPlayer;
+            startFrontX = darknessFrontX;
+        }
+    }
+
     void Update()
     {
         if (player == null)
