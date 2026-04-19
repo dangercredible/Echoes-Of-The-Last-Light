@@ -12,6 +12,7 @@ public class PlayerController : MonoBehaviour
     private int jumpsRemaining;
 
     [Header("Air Dash")]
+    [Tooltip("Horizontal speed during an air dash. Input: Dash action or Left/Right Shift (keyboard).")]
     public float dashSpeed = 20f;
     public float dashDuration = 0.15f;
     public float dashCooldown = 0.8f;
@@ -19,6 +20,7 @@ public class PlayerController : MonoBehaviour
     private bool canDash = true;
     private float dashTimer;
     private float dashCooldownTimer;
+    private float dashLockedHorizontal = 1f;
 
     [Header("Slide")]
     public float slideSpeed = 12f;
@@ -164,7 +166,11 @@ public class PlayerController : MonoBehaviour
     void FixedUpdate()
     {
         if (isDashing)
+        {
+            rb.gravityScale = 0f;
+            rb.linearVelocity = new Vector2(dashLockedHorizontal * dashSpeed, 0f);
             return;
+        }
 
         if (isGrappling)
         {
@@ -532,9 +538,9 @@ public class PlayerController : MonoBehaviour
         dashTimer = dashDuration;
         dashCooldownTimer = dashCooldown;
 
-        float dashX = Mathf.Abs(moveInput.x) > 0.1f ? Mathf.Sign(moveInput.x) : (facingRight ? 1f : -1f);
+        dashLockedHorizontal = Mathf.Abs(moveInput.x) > 0.1f ? Mathf.Sign(moveInput.x) : (facingRight ? 1f : -1f);
         rb.gravityScale = 0f;
-        rb.linearVelocity = new Vector2(dashX * dashSpeed, 0f);
+        rb.linearVelocity = new Vector2(dashLockedHorizontal * dashSpeed, 0f);
     }
 
     void StopDash()

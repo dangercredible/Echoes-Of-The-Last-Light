@@ -161,6 +161,28 @@
                 },
                 {
                     "name": "",
+                    "id": "a1b2c3d4-e5f6-4789-a012-3456789abcd",
+                    "path": "<Gamepad>/leftShoulder",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Dash",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "b2c3d4e5-f6a7-4890-b123-456789abcdef",
+                    "path": "<Gamepad>/rightShoulder",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Dash",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
                     "id": "6c021a7b-b5e0-4f4b-8ce8-3dff8f67bc8e",
                     "path": "<Keyboard>/leftCtrl",
                     "interactions": "",
