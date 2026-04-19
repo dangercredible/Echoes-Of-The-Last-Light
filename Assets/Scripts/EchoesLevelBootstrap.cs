@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.Serialization;
 
 [ExecuteAlways]
 [DefaultExecutionOrder(-200)]
@@ -53,7 +54,8 @@ public class EchoesLevelBootstrap : MonoBehaviour
 
     [Header("Light bridges (generated platforms)")]
     [Tooltip("Indices i for Platform_i that become LightActivatedPlatform bridges (copy style from Platform_LightBridge_A).")]
-    public int[] lightBridgeAutoPlatformIndices = { 7, 9, 15, 16, 19 };
+    [FormerlySerializedAs("lightBridgeAutoPlatformIndices")]
+    public int[] lightBridgePlatformIndices = { 7, 9, 15, 16, 19 };
 
     [Header("Bouncy pads (Mario-style)")]
     [Tooltip("Indices i for regular Platform_i that bounce the player upward when landed on.")]
@@ -102,7 +104,7 @@ public class EchoesLevelBootstrap : MonoBehaviour
         {
             string n = root.name;
             if (n == "Ground_Left" || n == "Ground_Right" || n == "PitKillZone" || n == "Respawn_Pit"
-                || IsGeneratedPlatformRootName(n) || n.StartsWith("Wall_Auto_")
+                || IsGeneratedPlatformRootName(n) || IsProceduralWallRootName(n)
                 || IsGeneratedGrapplePointRootName(n) || n == "GameOverController" || n == "RoundCompleteController"
                 || n == "LevelCheckpoint")
                 UnityEditor.Undo.DestroyObjectImmediate(root);
@@ -286,7 +288,7 @@ public class EchoesLevelBootstrap : MonoBehaviour
             if (Mathf.Abs(x - 2f) < avoidDefaultWallRadius)
                 continue;
 
-            GameObject wall = new GameObject($"Wall_Auto_{i}");
+            GameObject wall = new GameObject($"Wall_{i}");
             wall.layer = wallLayer;
             wall.transform.position = new Vector3(x, templateY, 0f);
             wall.transform.localScale = templateScale;
@@ -330,30 +332,30 @@ public class EchoesLevelBootstrap : MonoBehaviour
             Vector3 position = new Vector3(x, y, 0f);
             Vector3 scale = new Vector3(w, 0.45f, 1f);
 
-            if (AutoPlatformIndexIsLightBridge(i))
+            if (PlatformIndexIsLightBridge(i))
                 CreateLightBridgePlatform(lightBridgeTemplate, sprite, position, scale, 6, i);
             else
             {
                 GameObject plat = CreateGroundChunk(GeneratedPlatformName(i), sprite, position, scale, 6);
-                if (plat != null && AutoPlatformIndexIsBouncy(i))
+                if (plat != null && PlatformIndexIsBouncy(i))
                     plat.AddComponent<BouncyPlatform>();
             }
         }
     }
 
-    bool AutoPlatformIndexIsLightBridge(int index)
+    bool PlatformIndexIsLightBridge(int index)
     {
-        if (lightBridgeAutoPlatformIndices == null)
+        if (lightBridgePlatformIndices == null)
             return false;
-        for (int j = 0; j < lightBridgeAutoPlatformIndices.Length; j++)
+        for (int j = 0; j < lightBridgePlatformIndices.Length; j++)
         {
-            if (lightBridgeAutoPlatformIndices[j] == index)
+            if (lightBridgePlatformIndices[j] == index)
                 return true;
         }
         return false;
     }
 
-    bool AutoPlatformIndexIsBouncy(int index)
+    bool PlatformIndexIsBouncy(int index)
     {
         if (bouncyPlatformIndices == null)
             return false;
@@ -372,21 +374,31 @@ public class EchoesLevelBootstrap : MonoBehaviour
 #if UNITY_EDITOR
     static bool IsGeneratedPlatformRootName(string objectName)
     {
-        if (objectName.StartsWith("Platform_Auto_"))
-            return true;
         if (!objectName.StartsWith("Platform_"))
             return false;
         string rest = objectName.Substring("Platform_".Length);
+        if (rest.StartsWith("Auto_"))
+            rest = rest.Substring("Auto_".Length);
         return int.TryParse(rest, out _);
     }
 
     static bool IsGeneratedGrapplePointRootName(string objectName)
     {
-        if (objectName.StartsWith("GrapplePoint_Auto_"))
-            return true;
         if (!objectName.StartsWith("GrapplePoint_"))
             return false;
         string rest = objectName.Substring("GrapplePoint_".Length);
+        if (rest.StartsWith("Auto_"))
+            rest = rest.Substring("Auto_".Length);
+        return int.TryParse(rest, out _);
+    }
+
+    static bool IsProceduralWallRootName(string objectName)
+    {
+        if (objectName.StartsWith("Wall_Auto_"))
+            return true;
+        if (!objectName.StartsWith("Wall_"))
+            return false;
+        string rest = objectName.Substring("Wall_".Length);
         return int.TryParse(rest, out _);
     }
 #endif
@@ -396,7 +408,7 @@ public class EchoesLevelBootstrap : MonoBehaviour
         if (template == null)
         {
             GameObject plat = CreateGroundChunk(GeneratedPlatformName(index), fallbackSprite, position, scale, layer);
-            if (plat != null && AutoPlatformIndexIsBouncy(index))
+            if (plat != null && PlatformIndexIsBouncy(index))
                 plat.AddComponent<BouncyPlatform>();
             return;
         }
@@ -469,7 +481,7 @@ public class EchoesLevelBootstrap : MonoBehaviour
                 if (Mathf.Abs(x - pitCenterX) < pitAvoidHalf)
                     continue;
 
-                CreateAutoGrapplePoint(templatePoint, templateRenderer, new Vector3(x, y, 0f), index++);
+                CreateGrapplePoint(templatePoint, templateRenderer, new Vector3(x, y, 0f), index++);
             }
         }
 
@@ -484,11 +496,11 @@ public class EchoesLevelBootstrap : MonoBehaviour
             if (Mathf.Abs(x - pitCenterX) < pitAvoidHalf)
                 continue;
 
-            CreateAutoGrapplePoint(templatePoint, templateRenderer, new Vector3(x, y, 0f), index++);
+            CreateGrapplePoint(templatePoint, templateRenderer, new Vector3(x, y, 0f), index++);
         }
     }
 
-    void CreateAutoGrapplePoint(LightGrapplePoint templatePoint, SpriteRenderer templateRenderer, Vector3 position, int index)
+    void CreateGrapplePoint(LightGrapplePoint templatePoint, SpriteRenderer templateRenderer, Vector3 position, int index)
     {
         GameObject pointObject = new GameObject(GeneratedGrapplePointName(index));
         pointObject.layer = templateRenderer.gameObject.layer;
@@ -603,12 +615,12 @@ public class EchoesLevelBootstrap : MonoBehaviour
         if (template == null)
             return;
 
-        if (lightBridgeAutoPlatformIndices == null)
+        if (lightBridgePlatformIndices == null)
             return;
 
-        for (int i = 0; i < lightBridgeAutoPlatformIndices.Length; i++)
+        for (int i = 0; i < lightBridgePlatformIndices.Length; i++)
         {
-            int idx = lightBridgeAutoPlatformIndices[i];
+            int idx = lightBridgePlatformIndices[i];
             GameObject plat = GameObject.Find(GeneratedPlatformName(idx));
             if (plat == null)
                 plat = GameObject.Find($"Platform_Auto_{idx}");
