@@ -3,6 +3,9 @@ using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 using UnityEngine.InputSystem;
 
+/// <summary>
+/// Manages game-over state, restart input, and lightweight runtime UI creation.
+/// </summary>
 public class GameOverController : MonoBehaviour
 {
     static GameOverController instance;
@@ -75,6 +78,7 @@ public class GameOverController : MonoBehaviour
         if (message != null)
             message.text = $"{titleText}\n\n{reason}\n\n{restartHint}";
 
+        // Pause gameplay and show overlay text.
         Time.timeScale = 0f;
     }
 
@@ -118,6 +122,7 @@ public class GameOverController : MonoBehaviour
 
     void EnsureUI()
     {
+        // Reuse a scene UI if present, otherwise create a simple fallback HUD/overlay.
         if (canvas != null && panel != null && message != null && healthText != null)
             return;
 

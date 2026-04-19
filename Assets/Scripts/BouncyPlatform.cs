@@ -1,6 +1,9 @@
 using UnityEngine;
 
 [RequireComponent(typeof(Collider2D))]
+/// <summary>
+/// Makes a platform launch the player upward when landed on from above.
+/// </summary>
 public class BouncyPlatform : MonoBehaviour
 {
     [Tooltip("Upward velocity applied when the player lands on top (Mario-style mushroom pad).")]
@@ -19,6 +22,7 @@ public class BouncyPlatform : MonoBehaviour
 
     void OnCollisionEnter2D(Collision2D collision)
     {
+        // Only bounce the player character.
         PlayerController player = collision.collider.GetComponent<PlayerController>();
         if (player == null)
             return;
@@ -30,6 +34,7 @@ public class BouncyPlatform : MonoBehaviour
         if (collision.relativeVelocity.y > -minDownwardSpeed)
             return;
 
+        // Require a top-side contact normal so side hits do not trigger a bounce.
         for (int i = 0; i < collision.contactCount; i++)
         {
             ContactPoint2D cp = collision.GetContact(i);

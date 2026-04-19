@@ -1,8 +1,36 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
 
+/// <summary>
+/// Core player movement/combat traversal controller (run, jump, dash, slide, glide, grapple, lantern).
+/// Also includes a lightweight tutorial hint overlay for key bindings.
+/// </summary>
 public class PlayerController : MonoBehaviour
 {
+    private enum HintId
+    {
+        Move,
+        Jump,
+        Dash,
+        Slide,
+        Grapple,
+        Lantern
+    }
+
+    private const int HideHintAfterUses = 2;
+    private readonly int[] hintUseCounts = new int[6];
+    private readonly int[] hintLastUsedFrame = new int[6];
+    private GUIStyle hintBoxStyle;
+    private readonly string[] hintLines =
+    {
+        "Move: A / D or Arrow Keys",
+        "Jump: Space or Up Arrow",
+        "Dash: Left/Right Shift",
+        "Slide: Left Ctrl / C / S",
+        "Grapple: E / Q / Right Mouse",
+        "Lantern: F"
+    };
+
     [Header("Movement")]
     public float moveSpeed = 8f;
     public float jumpForce = 18f;
@@ -152,6 +180,7 @@ public class PlayerController : MonoBehaviour
 
     void Update()
     {
+        // Input + state updates in Update, physics application in FixedUpdate.
         ApplyKeyboardFallbackInput();
         UpdateGroundedState();
         UpdateWallState();
@@ -176,6 +205,7 @@ public class PlayerController : MonoBehaviour
         {
             if (grappleJoint != null && grappleJoint.enabled)
             {
+                // W/S (or vertical move axis) reels rope length in/out while grappling.
                 float reelAxis = moveInput.y;
                 if (Keyboard.current != null && Keyboard.current.wKey.isPressed)
                     reelAxis += 1f;
@@ -224,6 +254,7 @@ public class PlayerController : MonoBehaviour
     {
         if (value.isPressed)
         {
+            MarkHintUsed(HintId.Jump);
             if (isGrappling)
                 DetachFromGrappleByJump();
 
@@ -241,13 +272,19 @@ public class PlayerController : MonoBehaviour
     public void OnDash(InputValue value)
     {
         if (value.isPressed)
+        {
+            MarkHintUsed(HintId.Dash);
             TryStartDash();
+        }
     }
 
     public void OnSlide(InputValue value)
     {
         if (value.isPressed)
+        {
+            MarkHintUsed(HintId.Slide);
             TryStartSlide();
+        }
     }
 
     public void OnGlide(InputValue value)
@@ -259,17 +296,24 @@ public class PlayerController : MonoBehaviour
     {
         grappleHeld = value.isPressed;
         if (value.isPressed)
+        {
+            MarkHintUsed(HintId.Grapple);
             TryStartGrapple();
+        }
     }
 
     public void OnLantern(InputValue value)
     {
         if (value.isPressed)
+        {
+            MarkHintUsed(HintId.Lantern);
             ToggleLantern();
+        }
     }
 
     void ApplyKeyboardFallbackInput()
     {
+        // Keyboard fallback keeps controls working even if Input Actions are missing/misconfigured.
         if (Keyboard.current == null)
         {
             moveInput = moveInputFromActions;
@@ -287,9 +331,12 @@ public class PlayerController : MonoBehaviour
         if (Keyboard.current.downArrowKey.isPressed)
             vertical -= 1f;
         moveInput = new Vector2(horizontal, vertical);
+        if (Mathf.Abs(horizontal) > 0.01f)
+            MarkHintUsed(HintId.Move);
 
         if (Keyboard.current.spaceKey.wasPressedThisFrame || Keyboard.current.upArrowKey.wasPressedThisFrame)
         {
+            MarkHintUsed(HintId.Jump);
             if (isGrappling)
                 DetachFromGrappleByJump();
             jumpBufferCounter = jumpBufferTime;
@@ -299,14 +346,21 @@ public class PlayerController : MonoBehaviour
             rb.linearVelocity = new Vector2(rb.linearVelocity.x, rb.linearVelocity.y * 0.5f);
 
         if (Keyboard.current.leftShiftKey.wasPressedThisFrame || Keyboard.current.rightShiftKey.wasPressedThisFrame)
+        {
+            MarkHintUsed(HintId.Dash);
             TryStartDash();
+        }
 
         if (Keyboard.current.leftCtrlKey.wasPressedThisFrame || Keyboard.current.cKey.wasPressedThisFrame || Keyboard.current.sKey.wasPressedThisFrame)
+        {
+            MarkHintUsed(HintId.Slide);
             TryStartSlide();
+        }
 
         bool grapplePressed = Keyboard.current.eKey.wasPressedThisFrame || Keyboard.current.qKey.wasPressedThisFrame;
         if (grapplePressed || (Mouse.current != null && Mouse.current.rightButton.wasPressedThisFrame))
         {
+            MarkHintUsed(HintId.Grapple);
             grappleHeld = true;
             TryStartGrapple();
         }
@@ -814,4 +868,50 @@ public class PlayerController : MonoBehaviour
 
     public float GetGlideStamina() => currentGlideStamina;
     public float GetGlideStaminaNormalized() => maxGlideStamina <= 0f ? 0f : Mathf.Clamp01(currentGlideStamina / maxGlideStamina);
+
+    private void OnGUI()
+    {
+        // Draw top-left tutorial boxes until each mechanic has been used enough times.
+        EnsureHintStyle();
+
+        float x = 16f;
+        float y = 16f;
+        const float width = 360f;
+        const float height = 32f;
+        const float gap = 6f;
+
+        for (int i = 0; i < hintLines.Length; i++)
+        {
+            if (hintUseCounts[i] >= HideHintAfterUses)
+                continue;
+
+            GUI.Box(new Rect(x, y, width, height), hintLines[i], hintBoxStyle);
+            y += height + gap;
+        }
+    }
+
+    private void MarkHintUsed(HintId hint)
+    {
+        int index = (int)hint;
+        if (hintUseCounts[index] >= HideHintAfterUses)
+            return;
+
+        // Prevent duplicate increments in the same frame when both PlayerInput and fallback paths fire.
+        if (hintLastUsedFrame[index] == Time.frameCount)
+            return;
+
+        hintLastUsedFrame[index] = Time.frameCount;
+        hintUseCounts[index]++;
+    }
+
+    private void EnsureHintStyle()
+    {
+        if (hintBoxStyle != null)
+            return;
+
+        hintBoxStyle = new GUIStyle(GUI.skin.box);
+        hintBoxStyle.alignment = TextAnchor.MiddleLeft;
+        hintBoxStyle.fontSize = 14;
+        hintBoxStyle.padding = new RectOffset(10, 10, 6, 6);
+    }
 }

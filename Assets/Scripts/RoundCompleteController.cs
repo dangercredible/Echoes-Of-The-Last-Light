@@ -3,6 +3,9 @@ using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 using UnityEngine.InputSystem;
 
+/// <summary>
+/// Controls "round complete" pause UI and restart flow.
+/// </summary>
 public class RoundCompleteController : MonoBehaviour
 {
     public static RoundCompleteController Instance { get; private set; }
@@ -67,6 +70,7 @@ public class RoundCompleteController : MonoBehaviour
         if (message != null)
             message.text = $"{titleText}\n\n{bodyText}\n\n{hintText}";
 
+        // Freeze gameplay while the completion screen is shown.
         Time.timeScale = 0f;
     }
 

@@ -1,5 +1,8 @@
 using UnityEngine;
 
+/// <summary>
+/// Controls the advancing darkness hazard, its visuals, and catch/death handling.
+/// </summary>
 public class DarknessSpreadController : MonoBehaviour
 {
     private static Sprite cachedSquareSprite;
@@ -81,6 +84,7 @@ public class DarknessSpreadController : MonoBehaviour
         if (catchCooldown > 0f)
             catchCooldown -= Time.deltaTime;
 
+        // Darkness slows while the lantern is active.
         bool lanternOn = lantern != null && lantern.IsOn;
         float speedMultiplier = lanternOn ? lanternSlowMultiplier : 1f;
         darknessFrontX += baseSpreadSpeed * speedMultiplier * Time.deltaTime;
@@ -93,6 +97,7 @@ public class DarknessSpreadController : MonoBehaviour
 
     void HandlePlayerCaught()
     {
+        // Prefer the health/death flow so all game-over messaging is consistent.
         catchCooldown = catchResetDelay;
 
         if (playerController != null)
@@ -149,6 +154,7 @@ public class DarknessSpreadController : MonoBehaviour
         if (darknessVisual == null)
             return;
 
+        // Stretch a simple sprite from the level left bound to the current darkness front.
         float width = Mathf.Max(0.1f, darknessFrontX - levelLeftX);
         float pulse = 1f + Mathf.Sin(Time.time * pulseSpeed) * pulseAmount;
 

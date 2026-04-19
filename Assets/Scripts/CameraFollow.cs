@@ -1,5 +1,8 @@
 using UnityEngine;
 
+/// <summary>
+/// Smoothly follows the player/camera target with a configurable offset.
+/// </summary>
 public class CameraFollow : MonoBehaviour
 {
 
@@ -7,11 +10,11 @@ public class CameraFollow : MonoBehaviour
     public float smoothSpeed = 5f;
     public Vector2 offset = new Vector2(0f, 1f);
 
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
     void LateUpdate()
     {
         if (target == null) return;
 
+        // Keep Z from current camera transform so only XY follows.
         Vector3 desired = new Vector3(
             target.position.x + offset.x,
             target.position.y + offset.y,
