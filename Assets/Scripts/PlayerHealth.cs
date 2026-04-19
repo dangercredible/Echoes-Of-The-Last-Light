@@ -1,5 +1,8 @@
 using UnityEngine;
 
+/// <summary>
+/// Basic health lifecycle for the player: damage, death, and reset.
+/// </summary>
 public class PlayerHealth : MonoBehaviour
 {
     public int maxHealth = 3;
@@ -33,6 +36,7 @@ public class PlayerHealth : MonoBehaviour
         if (IsDead)
             return;
 
+        // Stop player motion first, then route to game-over UI/controller.
         IsDead = true;
         CurrentHealth = 0;
 

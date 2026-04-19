@@ -1,5 +1,8 @@
 using UnityEngine;
 
+/// <summary>
+/// Platform that toggles collision/visual state based on lantern illumination.
+/// </summary>
 public class LightActivatedPlatform : MonoBehaviour, ILightReactive
 {
     [Header("References")]
@@ -44,6 +47,7 @@ public class LightActivatedPlatform : MonoBehaviour, ILightReactive
 
     void EnsureLightOverlapCollider()
     {
+        // Add a trigger sensor so lantern overlap checks can detect the platform reliably.
         if (solidCollider == null)
             return;
 
@@ -82,6 +86,7 @@ public class LightActivatedPlatform : MonoBehaviour, ILightReactive
     {
         bool changed = IsIlluminated != illuminated;
 
+        // "Sticky" bridges stay enabled after first activation if configured.
         if (staysEnabledAfterFirstLight && activatedOnce)
             illuminated = true;
 

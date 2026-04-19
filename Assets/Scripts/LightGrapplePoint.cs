@@ -1,6 +1,9 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+/// <summary>
+/// Grapple anchor point that can be enabled/disabled by lantern light.
+/// </summary>
 public class LightGrapplePoint : MonoBehaviour, ILightReactive
 {
     public static readonly HashSet<LightGrapplePoint> ActivePoints = new HashSet<LightGrapplePoint>();
@@ -26,6 +29,7 @@ public class LightGrapplePoint : MonoBehaviour, ILightReactive
 
     void OnEnable()
     {
+        // Keep a global set so the player can query nearby/active anchors quickly.
         ActivePoints.Add(this);
         SetIlluminated(startIlluminated);
     }

@@ -3,6 +3,9 @@ using UnityEngine.Serialization;
 
 [ExecuteAlways]
 [DefaultExecutionOrder(-200)]
+/// <summary>
+/// Builds and maintains the procedural level layout (ground, platforms, walls, grapple points, and utility systems).
+/// </summary>
 public class EchoesLevelBootstrap : MonoBehaviour
 {
     [Header("Ground")]
@@ -83,6 +86,7 @@ public class EchoesLevelBootstrap : MonoBehaviour
 
     public void TryBuildLayout()
     {
+        // If the generated floor already exists, assume layout has been built.
         if (GameObject.Find("Ground_Left") != null)
             return;
 
@@ -131,6 +135,7 @@ public class EchoesLevelBootstrap : MonoBehaviour
 
     void BuildLayoutCore()
     {
+        // Use the original Ground sprite as a template, then replace it with split floor chunks.
         GameObject playerObject = GameObject.Find("Player");
 
         Sprite groundSprite = null;
@@ -309,6 +314,7 @@ public class EchoesLevelBootstrap : MonoBehaviour
 
     void SpawnExtraPlatforms(Sprite sprite, float halfWidth, float pitMin, float pitMax)
     {
+        // Build a long path with optional special platform conversions by index.
         LightActivatedPlatform lightBridgeTemplate = null;
         GameObject lightBridgeObject = GameObject.Find("Platform_LightBridge_A");
         if (lightBridgeObject != null)
@@ -528,6 +534,7 @@ public class EchoesLevelBootstrap : MonoBehaviour
 
     void EnsurePlayerDeathSystems()
     {
+        // Guarantee required runtime systems are present even in partially configured scenes.
         GameObject playerObject = GameObject.Find("Player");
         if (playerObject == null)
             return;

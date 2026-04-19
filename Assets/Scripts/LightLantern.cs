@@ -1,6 +1,9 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+/// <summary>
+/// Handles lantern toggling, lighting reactive targets, and optional visual mood feedback.
+/// </summary>
 public class LightLantern : MonoBehaviour
 {
     readonly List<Collider2D> overlapWorkList = new List<Collider2D>(64);
@@ -41,6 +44,7 @@ public class LightLantern : MonoBehaviour
         if (!IsOn)
             return;
 
+        // Continuously keep all overlapping light-reactive objects illuminated.
         GatherOverlappingColliders();
 
         for (int i = 0; i < overlapWorkList.Count; i++)
@@ -100,6 +104,7 @@ public class LightLantern : MonoBehaviour
 
     void ClearLitTargets()
     {
+        // Turn off anything that was lit by this lantern, except active grapple swing targets.
         List<ILightReactive> toRemove = new List<ILightReactive>();
         foreach (ILightReactive reactive in litTargets)
         {
