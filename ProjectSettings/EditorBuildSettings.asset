@@ -9,7 +9,10 @@ EditorBuildSettings:
     path: Assets/Scenes/MainMenu.unity
     guid: e8a46552d97b02d43a7fc8517c97d5bf
   - enabled: 1
-    path: Assets/Scenes/gamescene.unity
+    path: Assets/Scenes/Theshattereddocks.unity
+    guid: a6031ccbd5020ef40bddc28d08bd1097
+  - enabled: 1
+    path: Assets/Scenes/TheOvergrowth.unity
     guid: 7629b1e1ff87fe34fb1f609efe352e61
   m_configObjects:
     com.unity.input.settings.actions: {fileID: -944628639613478452, guid: 2bcd2660ca9b64942af0de543d8d7100, type: 3}
