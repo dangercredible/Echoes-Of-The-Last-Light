@@ -3,34 +3,10 @@ using UnityEngine.InputSystem;
 
 /// <summary>
 /// Core player movement/combat traversal controller (run, jump, dash, slide, glide, grapple, lantern).
-/// Also includes a lightweight tutorial hint overlay for key bindings.
+/// Teaching is handled by world-space <see cref="WorldTutorialPrompt"/> triggers in the level.
 /// </summary>
 public class PlayerController : MonoBehaviour
 {
-    private enum HintId
-    {
-        Move,
-        Jump,
-        Dash,
-        Slide,
-        Grapple,
-        Lantern
-    }
-
-    private const int HideHintAfterUses = 2;
-    private readonly int[] hintUseCounts = new int[6];
-    private readonly int[] hintLastUsedFrame = new int[6];
-    private GUIStyle hintBoxStyle;
-    private readonly string[] hintLines =
-    {
-        "Move: A / D or Arrow Keys",
-        "Jump: Space or Up Arrow",
-        "Dash: Left/Right Shift",
-        "Slide: Left Ctrl / C / S",
-        "Grapple: E / Q / Right Mouse",
-        "Lantern: F"
-    };
-
     [Header("Movement")]
     public float moveSpeed = 8f;
     public float jumpForce = 18f;
@@ -94,13 +70,16 @@ public class PlayerController : MonoBehaviour
     private int lastWallSide;
 
     [Header("Grapple")]
-    public float grappleRange = 5f;
-    public float grappleMinRopeLength = 1.5f;
-    public float grappleMaxRopeLength = 6f;
+    public float grappleRange = 3.2f;
+    public float grappleMinRopeLength = 1.2f;
+    public float grappleMaxRopeLength = 3.6f;
     public float grappleReelSpeed = 8f;
     public float grappleSwingAirControl = 20f;
     public float grappleCooldown = 0.25f;
-    public bool requireIlluminatedGrapplePoints = false;
+    [Tooltip("Grapple anchors must be lit by the lantern radius.")]
+    public bool requireIlluminatedGrapplePoints = true;
+    [Tooltip("Requires the lantern / light element to be active before a grapple can attach or stay attached.")]
+    public bool requireLightElementForGrapple = true;
     public LayerMask grappleBlockerLayer;
     public LineRenderer grappleLine;
     public int grappleLineSegments = 18;
@@ -116,6 +95,12 @@ public class PlayerController : MonoBehaviour
 
     [Header("Lantern")]
     public LightLantern lantern;
+
+    [Header("Fall Damage")]
+    public bool enableFallDamage = true;
+    [Tooltip("World units dropped before one health segment is lost.")]
+    public float fallDamageSafeDistance = 8f;
+    public int fallDamageAmount = 1;
 
     [Header("Animation")]
     public Animator animator;
@@ -143,6 +128,8 @@ public class PlayerController : MonoBehaviour
     private readonly RaycastHit2D[] wallHits = new RaycastHit2D[2];
     private readonly RaycastHit2D[] grappleCastHits = new RaycastHit2D[12];
     private DistanceJoint2D grappleJoint;
+    private PlayerHealth health;
+    private float airbornePeakY;
 
     void Awake()
     {
@@ -150,6 +137,7 @@ public class PlayerController : MonoBehaviour
         capsuleCollider = GetComponent<CapsuleCollider2D>();
         baseGravityScale = rb.gravityScale;
         lantern = lantern != null ? lantern : GetComponentInChildren<LightLantern>();
+        health = GetComponent<PlayerHealth>();
         animator = animator != null ? animator : GetComponentInChildren<Animator>();
         grappleJoint = GetComponent<DistanceJoint2D>();
         if (grappleJoint == null)
@@ -176,6 +164,9 @@ public class PlayerController : MonoBehaviour
         wallFilter.useTriggers = false;
 
         currentGlideStamina = maxGlideStamina;
+        airbornePeakY = transform.position.y;
+
+        EchoesAudioDirector.EnsureExists();
     }
 
     void Update()
@@ -254,7 +245,6 @@ public class PlayerController : MonoBehaviour
     {
         if (value.isPressed)
         {
-            MarkHintUsed(HintId.Jump);
             if (isGrappling)
                 DetachFromGrappleByJump();
 
@@ -273,7 +263,6 @@ public class PlayerController : MonoBehaviour
     {
         if (value.isPressed)
         {
-            MarkHintUsed(HintId.Dash);
             TryStartDash();
         }
     }
@@ -282,7 +271,6 @@ public class PlayerController : MonoBehaviour
     {
         if (value.isPressed)
         {
-            MarkHintUsed(HintId.Slide);
             TryStartSlide();
         }
     }
@@ -297,7 +285,6 @@ public class PlayerController : MonoBehaviour
         grappleHeld = value.isPressed;
         if (value.isPressed)
         {
-            MarkHintUsed(HintId.Grapple);
             TryStartGrapple();
         }
     }
@@ -306,7 +293,6 @@ public class PlayerController : MonoBehaviour
     {
         if (value.isPressed)
         {
-            MarkHintUsed(HintId.Lantern);
             ToggleLantern();
         }
     }
@@ -331,12 +317,9 @@ public class PlayerController : MonoBehaviour
         if (Keyboard.current.downArrowKey.isPressed)
             vertical -= 1f;
         moveInput = new Vector2(horizontal, vertical);
-        if (Mathf.Abs(horizontal) > 0.01f)
-            MarkHintUsed(HintId.Move);
 
         if (Keyboard.current.spaceKey.wasPressedThisFrame || Keyboard.current.upArrowKey.wasPressedThisFrame)
         {
-            MarkHintUsed(HintId.Jump);
             if (isGrappling)
                 DetachFromGrappleByJump();
             jumpBufferCounter = jumpBufferTime;
@@ -347,20 +330,17 @@ public class PlayerController : MonoBehaviour
 
         if (Keyboard.current.leftShiftKey.wasPressedThisFrame || Keyboard.current.rightShiftKey.wasPressedThisFrame)
         {
-            MarkHintUsed(HintId.Dash);
             TryStartDash();
         }
 
         if (Keyboard.current.leftCtrlKey.wasPressedThisFrame || Keyboard.current.cKey.wasPressedThisFrame || Keyboard.current.sKey.wasPressedThisFrame)
         {
-            MarkHintUsed(HintId.Slide);
             TryStartSlide();
         }
 
         bool grapplePressed = Keyboard.current.eKey.wasPressedThisFrame || Keyboard.current.qKey.wasPressedThisFrame;
         if (grapplePressed || (Mouse.current != null && Mouse.current.rightButton.wasPressedThisFrame))
         {
-            MarkHintUsed(HintId.Grapple);
             grappleHeld = true;
             TryStartGrapple();
         }
@@ -376,7 +356,15 @@ public class PlayerController : MonoBehaviour
 
     void UpdateGroundedState()
     {
+        bool wasGrounded = isGrounded;
         isGrounded = groundCheck != null && Physics2D.OverlapCircle(groundCheck.position, groundCheckRadius, groundLayer);
+
+        if (!wasGrounded && isGrounded)
+        {
+            float fell = airbornePeakY - transform.position.y;
+            if (enableFallDamage && fell > fallDamageSafeDistance && health != null && !health.IsDead && !isGrappling)
+                health.Damage(fallDamageAmount, "fall");
+        }
 
         if (isGrounded)
         {
@@ -386,12 +374,14 @@ public class PlayerController : MonoBehaviour
             isGliding = false;
             currentGlideStamina = Mathf.Min(maxGlideStamina, currentGlideStamina + glideStaminaRecoveryRate * Time.deltaTime);
             StopGrapple();
+            airbornePeakY = transform.position.y;
         }
         else
         {
             coyoteTimeCounter -= Time.deltaTime;
             if (!isGliding)
                 currentGlideStamina = Mathf.Min(maxGlideStamina, currentGlideStamina + (glideStaminaRecoveryRate * 0.35f) * Time.deltaTime);
+            airbornePeakY = Mathf.Max(airbornePeakY, transform.position.y);
         }
     }
 
@@ -529,6 +519,12 @@ public class PlayerController : MonoBehaviour
             return;
         }
 
+        if (requireLightElementForGrapple && (lantern == null || !lantern.IsOn))
+        {
+            StopGrapple();
+            return;
+        }
+
         if (requireIlluminatedGrapplePoints && !grappleTarget.IsIlluminated)
         {
             StopGrapple();
@@ -563,6 +559,7 @@ public class PlayerController : MonoBehaviour
         rb.linearVelocity = new Vector2(rb.linearVelocity.x, jumpForce);
         jumpsRemaining--;
         coyoteTimeCounter = 0f;
+        EchoesAudioDirector.PlayJump();
     }
 
     void WallJump()
@@ -579,6 +576,7 @@ public class PlayerController : MonoBehaviour
         facingRight = rb.linearVelocity.x > 0f;
         wallCoyoteCounter = 0f;
         wallStickCounter = 0f;
+        EchoesAudioDirector.PlayJump();
     }
 
     void TryStartDash()
@@ -637,6 +635,9 @@ public class PlayerController : MonoBehaviour
         if (grappleCooldownTimer > 0f || isDashing || isSliding)
             return;
 
+        if (requireLightElementForGrapple && (lantern == null || !lantern.IsOn))
+            return;
+
         LightGrapplePoint nearest = null;
         float bestDistance = float.MaxValue;
         Vector2 origin = transform.position;
@@ -679,6 +680,8 @@ public class PlayerController : MonoBehaviour
             grappleJoint.distance = Mathf.Clamp(ropeLength, grappleMinRopeLength, grappleMaxRopeLength);
             grappleJoint.enabled = true;
         }
+
+        EchoesAudioDirector.PlayGrappleAttach();
     }
 
     void StopGrapple()
@@ -868,50 +871,4 @@ public class PlayerController : MonoBehaviour
 
     public float GetGlideStamina() => currentGlideStamina;
     public float GetGlideStaminaNormalized() => maxGlideStamina <= 0f ? 0f : Mathf.Clamp01(currentGlideStamina / maxGlideStamina);
-
-    private void OnGUI()
-    {
-        // Draw top-left tutorial boxes until each mechanic has been used enough times.
-        EnsureHintStyle();
-
-        float x = 16f;
-        float y = 16f;
-        const float width = 360f;
-        const float height = 32f;
-        const float gap = 6f;
-
-        for (int i = 0; i < hintLines.Length; i++)
-        {
-            if (hintUseCounts[i] >= HideHintAfterUses)
-                continue;
-
-            GUI.Box(new Rect(x, y, width, height), hintLines[i], hintBoxStyle);
-            y += height + gap;
-        }
-    }
-
-    private void MarkHintUsed(HintId hint)
-    {
-        int index = (int)hint;
-        if (hintUseCounts[index] >= HideHintAfterUses)
-            return;
-
-        // Prevent duplicate increments in the same frame when both PlayerInput and fallback paths fire.
-        if (hintLastUsedFrame[index] == Time.frameCount)
-            return;
-
-        hintLastUsedFrame[index] = Time.frameCount;
-        hintUseCounts[index]++;
-    }
-
-    private void EnsureHintStyle()
-    {
-        if (hintBoxStyle != null)
-            return;
-
-        hintBoxStyle = new GUIStyle(GUI.skin.box);
-        hintBoxStyle.alignment = TextAnchor.MiddleLeft;
-        hintBoxStyle.fontSize = 14;
-        hintBoxStyle.padding = new RectOffset(10, 10, 6, 6);
-    }
 }

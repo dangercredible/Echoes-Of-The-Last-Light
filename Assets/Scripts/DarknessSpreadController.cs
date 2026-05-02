@@ -33,9 +33,22 @@ public class DarknessSpreadController : MonoBehaviour
     public bool resetDarknessOnCatch = true;
     public float catchResetDelay = 0.15f;
 
+    [Header("Intro pacing")]
+    [Tooltip("Darkness does not advance until this many seconds have passed.")]
+    public float delayBeforeSpreadSeconds = 40f;
+
+    [Tooltip("Darkness also waits until the player has moved this far forward from their spawn X.")]
+    public float minForwardTravelBeforeSpread = 24f;
+
+    [Tooltip("While waiting, keep the darkness edge at least this far behind the player.")]
+    public float holdDarknessBehindPlayerWhileWaiting = 30f;
+
     private float darknessFrontX;
     private float catchCooldown;
     private Vector3 playerStartPosition;
+    private float spreadGateOriginX;
+    private float introSpreadUnlockTime;
+    private bool spreadUnlocked;
 
     void Awake()
     {
@@ -74,6 +87,10 @@ public class DarknessSpreadController : MonoBehaviour
             darknessFrontX = player.position.x - marginBehindPlayer;
             startFrontX = darknessFrontX;
         }
+
+        spreadGateOriginX = player.position.x;
+        introSpreadUnlockTime = Time.time + Mathf.Max(0f, delayBeforeSpreadSeconds);
+        spreadUnlocked = false;
     }
 
     void Update()
@@ -84,8 +101,24 @@ public class DarknessSpreadController : MonoBehaviour
         if (catchCooldown > 0f)
             catchCooldown -= Time.deltaTime;
 
-        // Darkness slows while the lantern is active.
         bool lanternOn = lantern != null && lantern.IsOn;
+
+        if (!spreadUnlocked)
+        {
+            bool timeReady = Time.time >= introSpreadUnlockTime;
+            bool travelReady = player.position.x >= spreadGateOriginX + minForwardTravelBeforeSpread;
+            if (timeReady && travelReady)
+                spreadUnlocked = true;
+        }
+
+        if (!spreadUnlocked)
+        {
+            float holdLine = player.position.x - holdDarknessBehindPlayerWhileWaiting;
+            darknessFrontX = Mathf.Min(darknessFrontX, holdLine);
+            UpdateDarknessVisual(lanternOn);
+            return;
+        }
+
         float speedMultiplier = lanternOn ? lanternSlowMultiplier : 1f;
         darknessFrontX += baseSpreadSpeed * speedMultiplier * Time.deltaTime;
 
