@@ -850,6 +850,61 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &125116116
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 125116118}
+  - component: {fileID: 125116117}
+  m_Layer: 0
+  m_Name: TutorialPrompt_3
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &125116117
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 125116116}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b6e7f8091a2c4d5e8f9012345678abcd, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::WorldTutorialPrompt
+  messageText: 'Press F to raise your light.
+
+    Light reveals bridges and wakes
+    grapple points.'
+  triggerSize: {x: 11, y: 6}
+  hideDelayAfterExit: 0.45
+  canvasWorldSize: {x: 9, y: 2.8}
+  worldScale: 0.028
+  verticalCharacters: 1
+  fontSize: 28
+  canvasWorldSizeVertical: {x: 2.7, y: 9.5}
+--- !u!4 &125116118
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 125116116}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 12, y: -0.4000001, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &139464089
 GameObject:
   m_ObjectHideFlags: 0
@@ -1121,6 +1176,21 @@ MonoBehaviour:
   litScaleBoost: 1.08
   stateFlashDuration: 0.15
   flashColor: {r: 1, g: 1, b: 1, a: 1}
+--- !u!115 &160033901
+MonoScript:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Name: 
+  serializedVersion: 7
+  m_DefaultReferences: {}
+  m_Icon: {fileID: 0}
+  m_Type: 0
+  m_ExecutionOrder: 0
+  m_ClassName: EchoesSceneAtmosphere
+  m_Namespace: 
+  m_AssemblyName: Assembly-CSharp
 --- !u!1 &170640068
 GameObject:
   m_ObjectHideFlags: 0
@@ -2968,6 +3038,60 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &440395158
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 440395160}
+  - component: {fileID: 440395159}
+  m_Layer: 0
+  m_Name: TutorialPrompt_1
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &440395159
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 440395158}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b6e7f8091a2c4d5e8f9012345678abcd, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::WorldTutorialPrompt
+  messageText: 'Walk with A / D or the Arrow Keys.
+
+    Jump with Space or Up Arrow.'
+  triggerSize: {x: 9, y: 5}
+  hideDelayAfterExit: 0.45
+  canvasWorldSize: {x: 9, y: 2.8}
+  worldScale: 0.028
+  verticalCharacters: 1
+  fontSize: 28
+  canvasWorldSizeVertical: {x: 2.7, y: 9.5}
+--- !u!4 &440395160
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 440395158}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: -44, y: -1.3499999, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &588726112
 GameObject:
   m_ObjectHideFlags: 0
@@ -3314,7 +3438,7 @@ Transform:
   m_GameObject: {fileID: 726960817}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -50.5533, y: -2.07, z: 0}
+  m_LocalPosition: {x: -50.79, y: -2.02, z: 0}
   m_LocalScale: {x: 2.5742602, y: 3.175133, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -3397,6 +3521,7 @@ MonoBehaviour:
   grappleSwingAirControl: 20
   grappleCooldown: 0.25
   requireIlluminatedGrapplePoints: 0
+  requireLightElementForGrapple: 1
   grappleBlockerLayer:
     serializedVersion: 2
     m_Bits: 0
@@ -3408,6 +3533,9 @@ MonoBehaviour:
   grappleDetachInertiaMultiplier: 1.12
   grappleDetachMinHorizontalSpeed: 4.5
   lantern: {fileID: 726960824}
+  enableFallDamage: 1
+  fallDamageSafeDistance: 8
+  fallDamageAmount: 1
   animator: {fileID: 0}
   groundCheck: {fileID: 89291190}
   groundCheckRadius: 0.15
@@ -3473,6 +3601,9 @@ MonoBehaviour:
   pulseAmount: 0.08
   resetDarknessOnCatch: 1
   catchResetDelay: 0.15
+  delayBeforeSpreadSeconds: 40
+  minForwardTravelBeforeSpread: 24
+  holdDarknessBehindPlayerWhileWaiting: 30
 --- !u!114 &726960826
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -3656,6 +3787,59 @@ Transform:
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 19.43, y: 0.14, z: 0}
   m_LocalScale: {x: 2.4499998, y: 0.45, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &796727653
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 796727655}
+  - component: {fileID: 796727654}
+  m_Layer: 0
+  m_Name: TutorialPrompt_4
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &796727654
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 796727653}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b6e7f8091a2c4d5e8f9012345678abcd, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::WorldTutorialPrompt
+  messageText: With your light on, press E, Q, or Right Mouse near a lit anchor to
+    grapple.
+  triggerSize: {x: 11, y: 6.5}
+  hideDelayAfterExit: 0.45
+  canvasWorldSize: {x: 9, y: 2.8}
+  worldScale: 0.028
+  verticalCharacters: 1
+  fontSize: 28
+  canvasWorldSizeVertical: {x: 2.7, y: 9.5}
+--- !u!4 &796727655
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 796727653}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 27, y: 1.1999998, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
@@ -5140,6 +5324,10 @@ MonoBehaviour:
   movePlayerToFarLeftOnBuild: 1
   spawnInsetFromLeftEdge: 4
   playerSpawnYOffsetFromGround: 1.12
+  introEasyPlatformColumns: 14
+  introVerticalWaveScale: 0.42
+  introGrappleFreeWorldUnits: 42
+  spawnWorldTutorialPrompts: 1
   lightBridgePlatformIndices: 07000000090000000f0000001000000013000000
   bouncyPlatformIndices: 030000000c00000014000000
   buildLayoutInEditMode: 1
@@ -5942,6 +6130,52 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &1327666164
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1327666166}
+  - component: {fileID: 1327666165}
+  m_Layer: 0
+  m_Name: EchoesSceneAtmosphere
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &1327666165
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1327666164}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 160033901}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EchoesSceneAtmosphere
+  cameraClearColor: {r: 0.035, g: 0.038, b: 0.072, a: 1}
+  ambientColor: {r: 0.065, g: 0.07, b: 0.11, a: 1}
+--- !u!4 &1327666166
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1327666164}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1427250970
 GameObject:
   m_ObjectHideFlags: 0
@@ -6322,6 +6556,63 @@ Transform:
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: -24.8, y: 2.46, z: 0}
   m_LocalScale: {x: 1.8, y: 0.45, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &1544786173
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1544786175}
+  - component: {fileID: 1544786174}
+  m_Layer: 0
+  m_Name: TutorialPrompt_2
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &1544786174
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1544786173}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b6e7f8091a2c4d5e8f9012345678abcd, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::WorldTutorialPrompt
+  messageText: 'Dash with Shift.
+
+    Slide with Ctrl, C, or S.
+
+    Hold Space while
+    falling to glide.'
+  triggerSize: {x: 10, y: 5.5}
+  hideDelayAfterExit: 0.45
+  canvasWorldSize: {x: 9, y: 2.8}
+  worldScale: 0.028
+  verticalCharacters: 1
+  fontSize: 28
+  canvasWorldSizeVertical: {x: 2.7, y: 9.5}
+--- !u!4 &1544786175
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1544786173}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: -27, y: -0.9000001, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
@@ -7040,10 +7331,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3ac9dae66841e3e4ab9f39ed45222d9e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::RoundCompleteController
-  createUIIfMissing: 1
-  titleText: ROUND COMPLETE
-  bodyText: You reached the end of the path.
-  hintText: Press R to play again
+  nextSceneAfterRound: 
 --- !u!4 &1999558794
 Transform:
   m_ObjectHideFlags: 0
@@ -7167,7 +7455,7 @@ Transform:
   m_GameObject: {fileID: 2038517049}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -48.3, y: -2.7, z: 0}
+  m_LocalPosition: {x: -54.11, y: -2.58, z: 0}
   m_LocalScale: {x: 1.3613834, y: 1.6811816, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -7232,3 +7520,8 @@ SceneRoots:
   - {fileID: 1999558794}
   - {fileID: 438457758}
   - {fileID: 2038517052}
+  - {fileID: 440395160}
+  - {fileID: 1544786175}
+  - {fileID: 125116118}
+  - {fileID: 796727655}
+  - {fileID: 1327666166}

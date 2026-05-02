@@ -2810,6 +2810,21 @@ MonoBehaviour:
   litScaleBoost: 1.08
   stateFlashDuration: 0.15
   flashColor: {r: 1, g: 1, b: 1, a: 1}
+--- !u!115 &301611817
+MonoScript:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Name: 
+  serializedVersion: 7
+  m_DefaultReferences: {}
+  m_Icon: {fileID: 0}
+  m_Type: 0
+  m_ExecutionOrder: 0
+  m_ClassName: EchoesSceneAtmosphere
+  m_Namespace: 
+  m_AssemblyName: Assembly-CSharp
 --- !u!1 &332277070
 GameObject:
   m_ObjectHideFlags: 0
@@ -3719,6 +3734,52 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &713922063
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 713922065}
+  - component: {fileID: 713922064}
+  m_Layer: 0
+  m_Name: EchoesSceneAtmosphere
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &713922064
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 713922063}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 301611817}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EchoesSceneAtmosphere
+  cameraClearColor: {r: 0.035, g: 0.038, b: 0.072, a: 1}
+  ambientColor: {r: 0.065, g: 0.07, b: 0.11, a: 1}
+--- !u!4 &713922065
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 713922063}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &726960817
 GameObject:
   m_ObjectHideFlags: 0
@@ -3857,12 +3918,12 @@ SpriteRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_MaskInteraction: 0
-  m_Sprite: {fileID: 7482667652216324306, guid: 311925a002f4447b3a28927169b83ea6, type: 3}
+  m_Sprite: {fileID: 3283186071982047432, guid: 15cbb332f72b1b3488564ce1795190dd, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
   m_DrawMode: 0
-  m_Size: {x: 1, y: 1}
+  m_Size: {x: 0.85, y: 0.82}
   m_AdaptiveModeThreshold: 0.5
   m_SpriteTileMode: 0
   m_WasSpriteAssigned: 1
@@ -3876,8 +3937,8 @@ Transform:
   m_GameObject: {fileID: 726960817}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -51.5, y: -2.88, z: 0}
-  m_LocalScale: {x: 0.8, y: 1.2, z: 1}
+  m_LocalPosition: {x: -52.4422, y: -2.44, z: 0}
+  m_LocalScale: {x: 2.0972345, y: 2.61192, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 89291190}
@@ -8228,3 +8289,4 @@ SceneRoots:
   - {fileID: 1841975127}
   - {fileID: 125639412}
   - {fileID: 900740653}
+  - {fileID: 713922065}
