@@ -9,6 +9,9 @@ EditorBuildSettings:
     path: Assets/Scenes/MainMenu.unity
     guid: e8a46552d97b02d43a7fc8517c97d5bf
   - enabled: 1
+    path: Assets/Scenes/OptionsMenu.unity
+    guid: c1d2e3f405162738495a6b7c8d9e0f1a
+  - enabled: 1
     path: Assets/Scenes/TheOvergrowth.unity
     guid: 7629b1e1ff87fe34fb1f609efe352e61
   - enabled: 1
