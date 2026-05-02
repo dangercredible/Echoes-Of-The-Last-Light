@@ -13,16 +13,16 @@ public class EchoesLevelBootstrap : MonoBehaviour
     public float groundTotalWidth = 110f;
 
     [Tooltip("Hole width for the pit (no collider). Kept away from the player spawn by pitCenterX.")]
-    public float pitWidth = 9f;
+    public float pitWidth = 8f;
 
     [Tooltip("World X center of the pit gap. Keep positive so x=0 stays on solid Ground_Left.")]
-    public float pitCenterX = 36f;
+    public float pitCenterX = 52f;
 
     public float groundY = -4f;
 
     [Header("Extra content (no scaling of existing scene objects)")]
-    public int extraPlatformColumns = 36;
-    public float extraPlatformSpacing = 6.5f;
+    public int extraPlatformColumns = 34;
+    public float extraPlatformSpacing = 7f;
     public float extraPlatformMinY = -1.5f;
     public float extraPlatformMaxY = 30f;
 
@@ -34,12 +34,12 @@ public class EchoesLevelBootstrap : MonoBehaviour
 
     [Header("Grapple points (procedural)")]
     [Tooltip("Vertical bands of grapple anchors.")]
-    public int grappleRows = 5;
+    public int grappleRows = 4;
 
     [Tooltip("How many grapple points per row across the level width.")]
-    public int grapplePointsPerRow = 5;
+    public int grapplePointsPerRow = 4;
 
-    public float grappleYMin = 0.5f;
+    public float grappleYMin = 2f;
     public float grappleYMax = 36f;
 
     [Tooltip("Extra grapple points on top of the grid (keep low; grid alone is usually enough).")]
@@ -54,6 +54,20 @@ public class EchoesLevelBootstrap : MonoBehaviour
 
     [Tooltip("Player transform Y so feet sit on the main floor (ground center Y + this).")]
     public float playerSpawnYOffsetFromGround = 1.12f;
+
+    [Header("Intro difficulty")]
+    [Tooltip("First N procedural platforms use gentler vertical variation.")]
+    public int introEasyPlatformColumns = 14;
+
+    [Tooltip("Scales vertical wave strength during intro platforms (lower = flatter path).")]
+    [Range(0.05f, 1f)]
+    public float introVerticalWaveScale = 0.42f;
+
+    [Tooltip("No auto grapple anchors spawn west of (world left edge + this). Gives room to learn movement first.")]
+    public float introGrappleFreeWorldUnits = 42f;
+
+    [Header("World tutorial prompts")]
+    public bool spawnWorldTutorialPrompts = true;
 
     [Header("Light bridges (generated platforms)")]
     [Tooltip("Indices i for Platform_i that become LightActivatedPlatform bridges (copy style from Platform_LightBridge_A).")]
@@ -79,6 +93,9 @@ public class EchoesLevelBootstrap : MonoBehaviour
         EnsureRoundCompleteControllerExists();
         TryBuildLayout();
 
+        EnsureWorldTutorialPromptsIfMissing();
+
+        EnsureEchoesSceneAtmosphere();
         EnsurePlayerDeathSystems();
         EnsureLightBridgeConversionOnExistingPlatforms();
         EnsureRoundCheckpointIfMissing();
@@ -110,7 +127,7 @@ public class EchoesLevelBootstrap : MonoBehaviour
             if (n == "Ground_Left" || n == "Ground_Right" || n == "PitKillZone" || n == "Respawn_Pit"
                 || IsGeneratedPlatformRootName(n) || IsProceduralWallRootName(n)
                 || IsGeneratedGrapplePointRootName(n) || n == "GameOverController" || n == "RoundCompleteController"
-                || n == "LevelCheckpoint")
+                || n == "LevelCheckpoint" || n.StartsWith("TutorialPrompt_"))
                 UnityEditor.Undo.DestroyObjectImmediate(root);
         }
 
@@ -330,7 +347,8 @@ public class EchoesLevelBootstrap : MonoBehaviour
             if (Mathf.Abs(x - pitCenterX) < pitAvoidHalf)
                 continue;
 
-            float wave = Mathf.Sin(i * 1.7f) * 4f + Mathf.Cos(i * 0.9f) * 2.5f;
+            float introWaveMul = i < introEasyPlatformColumns ? introVerticalWaveScale : 1f;
+            float wave = (Mathf.Sin(i * 1.7f) * 4f + Mathf.Cos(i * 0.9f) * 2.5f) * introWaveMul;
             float y = Mathf.Lerp(extraPlatformMinY, extraPlatformMaxY, (Mathf.Abs(wave) % 1f + 0.15f + (i % 5) * 0.12f) % 1f);
             y = Mathf.Clamp(y + wave * 0.35f, extraPlatformMinY, extraPlatformMaxY);
 
@@ -467,6 +485,7 @@ public class EchoesLevelBootstrap : MonoBehaviour
             return;
 
         float pitAvoidHalf = (pitMax - pitMin) * 0.5f + 4f;
+        float worldLeftEdge = -halfWidth;
         int rows = Mathf.Max(1, grappleRows);
         int cols = Mathf.Max(1, grapplePointsPerRow);
         int index = 0;
@@ -484,6 +503,9 @@ public class EchoesLevelBootstrap : MonoBehaviour
                 x += Mathf.Sin(row * 1.1f + col * 1.9f) * 5f;
                 x += (row % 3 - 1) * 1.1f;
 
+                if (x < worldLeftEdge + introGrappleFreeWorldUnits)
+                    continue;
+
                 if (Mathf.Abs(x - pitCenterX) < pitAvoidHalf)
                     continue;
 
@@ -499,6 +521,8 @@ public class EchoesLevelBootstrap : MonoBehaviour
             float x = Mathf.Lerp(-halfWidth + 6f, halfWidth - 6f, u);
             float y = Mathf.Lerp(grappleYMin + 2f, grappleYMax - 1f, v);
             x += Mathf.Sin(s * 3.1f) * 6f;
+            if (x < worldLeftEdge + introGrappleFreeWorldUnits)
+                continue;
             if (Mathf.Abs(x - pitCenterX) < pitAvoidHalf)
                 continue;
 
@@ -521,14 +545,71 @@ public class EchoesLevelBootstrap : MonoBehaviour
 
         LightGrapplePoint grapple = pointObject.AddComponent<LightGrapplePoint>();
         grapple.indicator = indicator;
-        grapple.startIlluminated = templatePoint.startIlluminated;
+        grapple.startIlluminated = false;
         grapple.activeColor = templatePoint.activeColor;
         grapple.inactiveColor = templatePoint.inactiveColor;
-        grapple.SetIlluminated(templatePoint.startIlluminated);
+        grapple.SetIlluminated(false);
 
 #if UNITY_EDITOR
         if (!Application.isPlaying)
             UnityEditor.Undo.RegisterCreatedObjectUndo(pointObject, "Echoes Level");
+#endif
+    }
+
+    void EnsureWorldTutorialPromptsIfMissing()
+    {
+#if UNITY_EDITOR
+        if (!Application.isPlaying && !buildLayoutInEditMode)
+            return;
+#endif
+        if (!spawnWorldTutorialPrompts)
+            return;
+
+        if (Object.FindObjectsByType<WorldTutorialPrompt>(FindObjectsSortMode.None).Length > 0)
+            return;
+
+        float half = groundTotalWidth * 0.5f;
+        SpawnWorldTutorialPrompts(half, groundY);
+    }
+
+    void SpawnWorldTutorialPrompts(float halfWidth, float groundY)
+    {
+#if UNITY_EDITOR
+        if (!Application.isPlaying && !buildLayoutInEditMode)
+            return;
+#endif
+        if (!spawnWorldTutorialPrompts)
+            return;
+
+        int serial = 0;
+        float wl = -halfWidth;
+
+        CreateWorldTutorialPrompt(ref serial, new Vector3(wl + 11f, groundY + 2.65f, 0f), new Vector2(9f, 5f),
+            "Walk with A / D or the Arrow Keys.\nJump with Space or Up Arrow.");
+
+        CreateWorldTutorialPrompt(ref serial, new Vector3(wl + 28f, groundY + 3.1f, 0f), new Vector2(10f, 5.5f),
+            "Dash with Shift.\nSlide with Ctrl, C, or S.\nHold Space while falling to glide.");
+
+        CreateWorldTutorialPrompt(ref serial, new Vector3(pitCenterX - 24f, groundY + 3.6f, 0f), new Vector2(11f, 6f),
+            "Press F to raise your light.\nLight reveals bridges and wakes grapple points.");
+
+        CreateWorldTutorialPrompt(ref serial, new Vector3(pitCenterX - 9f, groundY + 5.2f, 0f), new Vector2(11f, 6.5f),
+            "With your light on, press E, Q, or Right Mouse near a lit anchor to grapple.");
+    }
+
+    void CreateWorldTutorialPrompt(ref int serial, Vector3 position, Vector2 triggerSize, string message)
+    {
+        serial++;
+        GameObject go = new GameObject($"TutorialPrompt_{serial}");
+        go.transform.position = position;
+
+        WorldTutorialPrompt prompt = go.AddComponent<WorldTutorialPrompt>();
+        prompt.messageText = message;
+        prompt.triggerSize = triggerSize;
+
+#if UNITY_EDITOR
+        if (!Application.isPlaying)
+            UnityEditor.Undo.RegisterCreatedObjectUndo(go, "Echoes Tutorial");
 #endif
     }
 
@@ -578,6 +659,19 @@ public class EchoesLevelBootstrap : MonoBehaviour
 #if UNITY_EDITOR
         if (!Application.isPlaying)
             UnityEditor.Undo.RegisterCreatedObjectUndo(rgo, "Echoes Level");
+#endif
+    }
+
+    void EnsureEchoesSceneAtmosphere()
+    {
+        if (Object.FindFirstObjectByType<EchoesSceneAtmosphere>() != null)
+            return;
+
+        GameObject atmosphere = new GameObject("EchoesSceneAtmosphere");
+        atmosphere.AddComponent<EchoesSceneAtmosphere>();
+#if UNITY_EDITOR
+        if (!Application.isPlaying)
+            UnityEditor.Undo.RegisterCreatedObjectUndo(atmosphere, "Echoes Level");
 #endif
     }
 
@@ -658,5 +752,32 @@ public class EchoesLevelBootstrap : MonoBehaviour
 
             bridge.SetIlluminated(bridge.startsEnabled);
         }
+    }
+}
+
+/// <summary>
+/// Dark, airy render defaults for gameplay scenes (camera clear + ambient tint).
+/// Kept alongside bootstrap so the type is always available to the same assembly.
+/// </summary>
+public class EchoesSceneAtmosphere : MonoBehaviour
+{
+    [SerializeField] Color cameraClearColor = new Color(0.035f, 0.038f, 0.072f, 1f);
+    [SerializeField] Color ambientColor = new Color(0.065f, 0.07f, 0.11f, 1f);
+
+    void Awake()
+    {
+        Apply();
+    }
+
+    public void Apply()
+    {
+        Camera cam = Camera.main;
+        if (cam != null)
+            cam.backgroundColor = cameraClearColor;
+
+        RenderSettings.ambientMode = UnityEngine.Rendering.AmbientMode.Flat;
+        RenderSettings.ambientLight = ambientColor;
+
+        EchoesVisualBaseline.Commit(cameraClearColor, ambientColor);
     }
 }
