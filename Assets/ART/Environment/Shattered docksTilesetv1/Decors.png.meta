@@ -113,12 +113,12 @@ TextureImporter:
       name: shattered docks bg image_0
       rect:
         serializedVersion: 2
-        x: 0
+        x: 17
         y: 0
-        width: 322
-        height: 228
+        width: 73
+        height: 100
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -135,7 +135,7 @@ TextureImporter:
     customData: 
     physicsShape: []
     bones: []
-    spriteID: 
+    spriteID: 8718a98d54d542d4cbfaae83030f29c5
     internalID: 0
     vertices: []
     indices: 
