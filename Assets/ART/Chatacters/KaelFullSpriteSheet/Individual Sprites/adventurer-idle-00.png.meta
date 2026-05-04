@@ -110,15 +110,15 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: shattered docks bg image_0
+      name: Kael idle 1
       rect:
         serializedVersion: 2
-        x: 0
-        y: 0
-        width: 322
-        height: 228
+        x: 14
+        y: 1
+        width: 19
+        height: 29
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -135,7 +135,7 @@ TextureImporter:
     customData: 
     physicsShape: []
     bones: []
-    spriteID: 
+    spriteID: 2896a3ba9e4b0b14394e64f67c3af69b
     internalID: 0
     vertices: []
     indices: 
@@ -145,7 +145,7 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      shattered docks bg image_0: 2509494688647681578
+      Kael idle 1: 2509494688647681578
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 
