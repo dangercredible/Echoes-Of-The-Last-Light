@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -130,6 +131,7 @@ public class PlayerController : MonoBehaviour
     private DistanceJoint2D grappleJoint;
     private PlayerHealth health;
     private float airbornePeakY;
+    private HashSet<string> animatorParameterCache;
 
     void Awake()
     {
@@ -167,7 +169,21 @@ public class PlayerController : MonoBehaviour
         airbornePeakY = transform.position.y;
 
         EchoesAudioDirector.EnsureExists();
+        CacheAnimatorParameterNames();
     }
+
+    void CacheAnimatorParameterNames()
+    {
+        animatorParameterCache = null;
+        if (animator == null || animator.runtimeAnimatorController == null)
+            return;
+        animatorParameterCache = new HashSet<string>();
+        foreach (AnimatorControllerParameter p in animator.parameters)
+            animatorParameterCache.Add(p.name);
+    }
+
+    bool AnimatorHasParameter(string parameterName) =>
+        animatorParameterCache != null && animatorParameterCache.Contains(parameterName);
 
     void Update()
     {
@@ -822,14 +838,35 @@ public class PlayerController : MonoBehaviour
         if (animator == null)
             return;
 
-        animator.SetFloat("moveX", Mathf.Abs(moveInput.x));
-        animator.SetFloat("velocityY", rb.linearVelocity.y);
-        animator.SetBool("isGrounded", isGrounded);
-        animator.SetBool("isSliding", isSliding);
-        animator.SetBool("isDashing", isDashing);
-        animator.SetBool("isGliding", isGliding);
-        animator.SetBool("isWallSliding", isWallSliding);
-        animator.SetBool("isGrappling", isGrappling);
+        if (AnimatorHasParameter("moveX"))
+            animator.SetFloat("moveX", Mathf.Abs(moveInput.x));
+        if (AnimatorHasParameter("velocityY"))
+            animator.SetFloat("velocityY", rb.linearVelocity.y);
+        if (AnimatorHasParameter("isGrounded"))
+            animator.SetBool("isGrounded", isGrounded);
+        if (AnimatorHasParameter("isSliding"))
+            animator.SetBool("isSliding", isSliding);
+        if (AnimatorHasParameter("isDashing"))
+            animator.SetBool("isDashing", isDashing);
+        if (AnimatorHasParameter("isGliding"))
+            animator.SetBool("isGliding", isGliding);
+        if (AnimatorHasParameter("isWallSliding"))
+            animator.SetBool("isWallSliding", isWallSliding);
+        if (AnimatorHasParameter("isGrappling"))
+            animator.SetBool("isGrappling", isGrappling);
+
+        float speed = Mathf.Abs(rb.linearVelocity.x);
+        float vy = rb.linearVelocity.y;
+        if (AnimatorHasParameter("Speed"))
+            animator.SetFloat("Speed", speed);
+        if (AnimatorHasParameter("KaelRun"))
+            animator.SetBool("KaelRun", isGrounded && Mathf.Abs(moveInput.x) > 0.05f);
+        if (AnimatorHasParameter("Is Jumping"))
+            animator.SetBool("Is Jumping", !isGrounded && vy >= -0.15f);
+        if (AnimatorHasParameter("Is Falling"))
+            animator.SetBool("Is Falling", !isGrounded && vy < -0.15f);
+        if (AnimatorHasParameter("Trigger"))
+            animator.SetBool("Trigger", isDashing);
     }
 
     void FlipSprite()
