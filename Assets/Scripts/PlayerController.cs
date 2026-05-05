@@ -10,6 +10,12 @@ public class PlayerController : MonoBehaviour
 {
     [Header("Movement")]
     public float moveSpeed = 8f;
+    [Tooltip("How quickly horizontal speed reaches target while grounded.")]
+    public float groundAcceleration = 70f;
+    [Tooltip("How quickly horizontal speed reaches target while airborne.")]
+    public float airAcceleration = 38f;
+    [Tooltip("How quickly horizontal speed decays to zero when no input is held.")]
+    public float horizontalDeceleration = 60f;
     public float jumpForce = 18f;
 
     [Header("Double Jump")]
@@ -135,6 +141,8 @@ public class PlayerController : MonoBehaviour
 
     void Awake()
     {
+        DisableLegacyMovementScripts();
+
         rb = GetComponent<Rigidbody2D>();
         capsuleCollider = GetComponent<CapsuleCollider2D>();
         baseGravityScale = rb.gravityScale;
@@ -170,6 +178,18 @@ public class PlayerController : MonoBehaviour
 
         EchoesAudioDirector.EnsureExists();
         CacheAnimatorParameterNames();
+    }
+
+    void DisableLegacyMovementScripts()
+    {
+        // Prevent old movement scripts from fighting physics-based PlayerController.
+        PlayerController2 legacyController2 = GetComponent<PlayerController2>();
+        if (legacyController2 != null && legacyController2.enabled)
+            legacyController2.enabled = false;
+
+        PlayerMovementControl legacyMovement = GetComponent<PlayerMovementControl>();
+        if (legacyMovement != null && legacyMovement.enabled)
+            legacyMovement.enabled = false;
     }
 
     void CacheAnimatorParameterNames()
@@ -236,7 +256,18 @@ public class PlayerController : MonoBehaviour
             return;
         }
 
-        float horizontal = wallJumpMoveLockTimer > 0f ? 0f : moveInput.x * moveSpeed;
+        float targetHorizontal = wallJumpMoveLockTimer > 0f ? 0f : moveInput.x * moveSpeed;
+        float accel = isGrounded ? groundAcceleration : airAcceleration;
+        float horizontal = rb.linearVelocity.x;
+        if (Mathf.Abs(targetHorizontal) > 0.01f)
+        {
+            horizontal = Mathf.MoveTowards(horizontal, targetHorizontal, accel * Time.fixedDeltaTime);
+        }
+        else
+        {
+            horizontal = Mathf.MoveTowards(horizontal, 0f, horizontalDeceleration * Time.fixedDeltaTime);
+        }
+
         float vertical = rb.linearVelocity.y;
         if (isWallSliding)
         {
@@ -315,7 +346,8 @@ public class PlayerController : MonoBehaviour
 
     void ApplyKeyboardFallbackInput()
     {
-        // Keyboard fallback keeps controls working even if Input Actions are missing/misconfigured.
+        // Keyboard fallback keeps controls working if Input Actions are missing/misconfigured,
+        // while still allowing action-based movement on PC when keyboard movement isn't pressed.
         if (Keyboard.current == null)
         {
             moveInput = moveInputFromActions;
@@ -332,7 +364,9 @@ public class PlayerController : MonoBehaviour
             vertical += 1f;
         if (Keyboard.current.downArrowKey.isPressed)
             vertical -= 1f;
-        moveInput = new Vector2(horizontal, vertical);
+        Vector2 keyboardMove = new Vector2(horizontal, vertical);
+        bool usingKeyboardMove = Mathf.Abs(keyboardMove.x) > 0.01f || Mathf.Abs(keyboardMove.y) > 0.01f;
+        moveInput = usingKeyboardMove ? keyboardMove : moveInputFromActions;
 
         if (Keyboard.current.spaceKey.wasPressedThisFrame || Keyboard.current.upArrowKey.wasPressedThisFrame)
         {
