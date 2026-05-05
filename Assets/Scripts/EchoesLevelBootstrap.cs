@@ -55,6 +55,9 @@ public class EchoesLevelBootstrap : MonoBehaviour
     [Tooltip("Player transform Y so feet sit on the main floor (ground center Y + this).")]
     public float playerSpawnYOffsetFromGround = 1.12f;
 
+    [Tooltip("Extra lift applied after snapping the player to the top of the generated ground collider.")]
+    public float playerSpawnExtraLift = 0.03f;
+
     [Header("Intro difficulty")]
     [Tooltip("First N procedural platforms use gentler vertical variation.")]
     public int introEasyPlatformColumns = 14;
@@ -205,8 +208,7 @@ public class EchoesLevelBootstrap : MonoBehaviour
         if (movePlayerToFarLeftOnBuild && playerObject != null)
         {
             float spawnX = worldLeft + spawnInsetFromLeftEdge;
-            float spawnY = groundY + playerSpawnYOffsetFromGround;
-            playerObject.transform.position = new Vector3(spawnX, spawnY, 0f);
+            PositionPlayerOnGeneratedGround(playerObject, spawnX);
         }
 
         CreatePitKillZone(pitMin, pitMax);
@@ -249,6 +251,27 @@ public class EchoesLevelBootstrap : MonoBehaviour
         else
 #endif
             Destroy(target);
+    }
+
+    void PositionPlayerOnGeneratedGround(GameObject playerObject, float spawnX)
+    {
+        float spawnY = groundY + playerSpawnYOffsetFromGround;
+        float playerHalfHeight = 0.55f;
+
+        Collider2D playerCollider = playerObject.GetComponent<Collider2D>();
+        if (playerCollider != null)
+            playerHalfHeight = Mathf.Max(0.1f, playerCollider.bounds.extents.y);
+
+        GameObject leftGround = GameObject.Find("Ground_Left");
+        if (leftGround != null)
+        {
+            Collider2D leftGroundCollider = leftGround.GetComponent<Collider2D>();
+            if (leftGroundCollider != null)
+                spawnY = leftGroundCollider.bounds.max.y + playerHalfHeight + playerSpawnExtraLift;
+        }
+
+        Vector3 current = playerObject.transform.position;
+        playerObject.transform.position = new Vector3(spawnX, spawnY, current.z);
     }
 
     GameObject CreateGroundChunk(string chunkName, Sprite sprite, Vector3 position, Vector3 scale, int layer)

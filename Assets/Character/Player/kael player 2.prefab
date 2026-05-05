@@ -38,37 +38,6 @@ Transform:
   - {fileID: 8845123456789012304}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!1 &8845123456789012303
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 8845123456789012304}
-  m_Layer: 7
-  m_Name: Groundcheck
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!4 &8845123456789012304
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 8845123456789012303}
-  serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: -0.85, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 3174355821657181972}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!212 &777614951729365271
 SpriteRenderer:
   serializedVersion: 2
@@ -274,7 +243,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Unity.InputSystem::UnityEngine.InputSystem.PlayerInput
   m_Actions: {fileID: -944628639613478452, guid: bd14232455bc91040ab24db7e40a1dce, type: 3}
-  m_NotificationBehavior: 0
+  m_NotificationBehavior: 2
   m_UIInputModule: {fileID: 0}
   m_DeviceLostEvent:
     m_PersistentCalls:
@@ -285,7 +254,63 @@ MonoBehaviour:
   m_ControlsChangedEvent:
     m_PersistentCalls:
       m_Calls: []
-  m_ActionEvents: []
+  m_ActionEvents:
+  - m_PersistentCalls:
+      m_Calls: []
+    m_ActionId: 6c62966e-a3d5-4864-8a75-ee90558795be
+    m_ActionName: 'Player/Move[/Keyboard/upArrow,/Keyboard/downArrow,/Keyboard/a,/Keyboard/d]'
+  - m_PersistentCalls:
+      m_Calls: []
+    m_ActionId: b20a1079-4af2-4f8d-b43b-d0608ff620f4
+    m_ActionName: 'Player/Jump[/Keyboard/space]'
+  - m_PersistentCalls:
+      m_Calls: []
+    m_ActionId: f0f5ae18-0f4e-42d5-a713-a67bf0469be1
+    m_ActionName: 'Player/Dash[/Keyboard/leftShift,/Keyboard/rightShift]'
+  - m_PersistentCalls:
+      m_Calls: []
+    m_ActionId: 8e830f72-ce66-4609-96f6-cb8f5f853cf0
+    m_ActionName: 'Player/Slide[/Keyboard/leftCtrl,/Keyboard/c,/Keyboard/s]'
+  - m_PersistentCalls:
+      m_Calls: []
+    m_ActionId: f6a57317-0d13-4a12-a089-f6e6f35545dc
+    m_ActionName: 'Player/Glide[/Keyboard/space,/Keyboard/rightShift]'
+  - m_PersistentCalls:
+      m_Calls: []
+    m_ActionId: 1a1da2fb-ccde-44dc-b0f5-67e4e13fe8c5
+    m_ActionName: 'Player/Grapple[/Keyboard/e,/Keyboard/q,/Mouse/rightButton]'
+  - m_PersistentCalls:
+      m_Calls: []
+    m_ActionId: 930f3464-b440-4788-91d6-a0bd7182f17e
+    m_ActionName: 'Player/Lantern[/Keyboard/f,/Mouse/leftButton]'
+  - m_PersistentCalls:
+      m_Calls: []
+    m_ActionId: 553cb6ef-e4d7-47fc-94bf-84099ab659f8
+    m_ActionName: Player/New action
+  - m_PersistentCalls:
+      m_Calls: []
+    m_ActionId: 04d5b51f-65ab-46d5-ad04-833b95bc653e
+    m_ActionName: Player/New action1
+  - m_PersistentCalls:
+      m_Calls: []
+    m_ActionId: acc28d53-a9a5-47de-a7a8-646a1d8a95ac
+    m_ActionName: Player/New action2
+  - m_PersistentCalls:
+      m_Calls: []
+    m_ActionId: 67468157-5439-45a1-b9f5-52fe7bf250e3
+    m_ActionName: Player/New action3
+  - m_PersistentCalls:
+      m_Calls: []
+    m_ActionId: 79664ed0-3a7e-4851-bcac-ac8a3aad8596
+    m_ActionName: Player/New action4
+  - m_PersistentCalls:
+      m_Calls: []
+    m_ActionId: 38ed9350-01d1-4d27-b7c0-77b28c3fcbf9
+    m_ActionName: New action map/Move
+  - m_PersistentCalls:
+      m_Calls: []
+    m_ActionId: e9cd9bdc-3ee4-426c-aaa9-010cb5248ca4
+    m_ActionName: 'New action map/Run[/Keyboard/leftArrow]'
   m_NeverAutoSwitchControlSchemes: 0
   m_DefaultControlScheme: 
   m_DefaultActionMap: Player
@@ -301,7 +326,7 @@ Animator:
   m_GameObject: {fileID: 784912977562079586}
   m_Enabled: 1
   m_Avatar: {fileID: 0}
-  m_Controller: {fileID: 9100000, guid: 509ffd67443f1734dbc1a6c95a71d14a, type: 2}
+  m_Controller: {fileID: 9100000, guid: 22f3b9d3e8629fb4b9c9cf859962fe39, type: 2}
   m_CullingMode: 0
   m_UpdateMode: 0
   m_ApplyRootMotion: 0
@@ -313,3 +338,34 @@ Animator:
   m_AllowConstantClipSamplingOptimization: 1
   m_KeepAnimatorStateOnDisable: 0
   m_WriteDefaultValuesOnDisable: 0
+--- !u!1 &8845123456789012303
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 8845123456789012304}
+  m_Layer: 7
+  m_Name: Groundcheck
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &8845123456789012304
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8845123456789012303}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: -0.85, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 3174355821657181972}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
