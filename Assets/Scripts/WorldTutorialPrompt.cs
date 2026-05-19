@@ -8,7 +8,7 @@ using UnityEngine.UI;
 /// </summary>
 public class WorldTutorialPrompt : MonoBehaviour
 {
-    [TextArea(2, 6)]
+    [TextArea(8, 24)]
     public string messageText = "";
 
     [Tooltip("Collider size if none exists — assigned on Start.")]
@@ -20,7 +20,7 @@ public class WorldTutorialPrompt : MonoBehaviour
 
     [Header("Label layout")]
     [Tooltip("Stack letters vertically (one character per line).")]
-    public bool verticalCharacters = true;
+    public bool verticalCharacters = false;
 
     [Range(14f, 56f)]
     public float fontSize = 28f;
