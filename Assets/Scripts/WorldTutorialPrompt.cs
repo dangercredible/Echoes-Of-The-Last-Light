@@ -8,6 +8,8 @@ using UnityEngine.UI;
 /// </summary>
 public class WorldTutorialPrompt : MonoBehaviour
 {
+    public static bool PromptsEnabled = false;
+
     [TextArea(8, 24)]
     public string messageText = "";
 
@@ -31,8 +33,17 @@ public class WorldTutorialPrompt : MonoBehaviour
     Canvas promptCanvas;
     TextMeshProUGUI label;
 
+    void Awake()
+    {
+        if (!PromptsEnabled)
+            gameObject.SetActive(false);
+    }
+
     void Start()
     {
+        if (!PromptsEnabled)
+            return;
+
         BoxCollider2D box = GetComponent<BoxCollider2D>();
         if (box == null)
         {

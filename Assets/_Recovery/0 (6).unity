@@ -5963,7 +5963,6 @@ GameObject:
   m_Component:
   - component: {fileID: 940001002}
   - component: {fileID: 940001003}
-  - component: {fileID: 940001004}
   m_Layer: 7
   m_Name: CloakBack
   m_TagString: Untagged
@@ -6045,27 +6044,6 @@ SpriteRenderer:
   m_SpriteTileMode: 0
   m_WasSpriteAssigned: 0
   m_SpriteSortPoint: 0
---- !u!114 &940001004
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 940001001}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: c7a1f2e93d4b5c6d7e8f9012345678ab, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::KaelCloakWave
-  follow: {fileID: 0}
-  localOffset: {x: -0.1, y: -0.18, z: 0}
-  waveDegrees: 11
-  waveSpeed: 2.6
-  velocityTiltScale: 2.2
-  darkGold: {r: 0.42, g: 0.32, b: 0.08, a: 0.96}
-  brightGold: {r: 1, g: 0.88, b: 0.38, a: 1}
-  glowPulseSpeed: 3.1
-  glowAmount: 0.22
 --- !u!1 &940001010
 GameObject:
   m_ObjectHideFlags: 0
@@ -6075,7 +6053,6 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 940001011}
-  - component: {fileID: 940001012}
   m_Layer: 0
   m_Name: LevelOpeningControlsHint
   m_TagString: Untagged
@@ -6098,27 +6075,6 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &940001012
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 940001010}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: d8b2c3f04e5a6b7c8d9e0123456789bc, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::LevelOpeningControlsHint
-  body: "<b>Kael \u2014 controls</b>\nMove / Walk / Run: <b>A D</b> or <b>Arrow Keys</b>\nJump
-    (double jump): <b>Space</b> or <b>Up Arrow</b>\nAir dash: <b>Left Shift</b> or
-    <b>Right Shift</b>\nSlide: <b>Ctrl</b>, <b>C</b>, or hold <b>S</b> on ground\nGlide:
-    hold <b>Space</b> while falling\nLantern: <b>F</b> or <b>Mouse Left</b>\nGrapple:
-    <b>E</b>, <b>Q</b>, or <b>Mouse Right</b> (near lit anchor, lantern on)\n\n<i>Press
-    a movement key, Space, Enter, or Esc to dismiss.</i>"
-  fontOverride: {fileID: 0}
-  autoHideSeconds: 16
-  anchor: {x: 0.5, y: 0.88}
 --- !u!1 &960059095
 GameObject:
   m_ObjectHideFlags: 0

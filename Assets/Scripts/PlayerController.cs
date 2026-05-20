@@ -112,6 +112,21 @@ public class PlayerController : MonoBehaviour
     [Header("Animation")]
     public Animator animator;
 
+    [Header("Animation Tuning")]
+    [Tooltip("Small smoothing time for horizontal speed sent to Animator.")]
+    public float animationSpeedDampTime = 0.08f;
+    [Tooltip("Small smoothing time for input amount sent to Animator.")]
+    public float animationInputDampTime = 0.06f;
+    [Tooltip("Run animation starts when grounded horizontal speed reaches this value.")]
+    public float animationRunStartSpeed = 0.35f;
+    [Tooltip("Run animation stops after grounded horizontal speed drops below this value.")]
+    public float animationRunStopSpeed = 0.12f;
+    [Tooltip("Vertical velocity band treated as neither jumping nor falling.")]
+    public float animationVerticalDeadzone = 0.18f;
+    [Tooltip("Brief grace period that prevents jump/fall flicker on tiny ground-check gaps.")]
+    public float animationGroundedGraceTime = 0.08f;
+    public bool runAnimationRequiresGrounded = true;
+
     [Header("Ground Check")]
     public Transform groundCheck;
     public float groundCheckRadius = 0.15f;
@@ -138,6 +153,9 @@ public class PlayerController : MonoBehaviour
     private PlayerHealth health;
     private float airbornePeakY;
     private HashSet<string> animatorParameterCache;
+    private int lastLanternToggleFrame = -1;
+    private bool animatorRunState;
+    private float animatorUngroundedTime;
 
     void Awake()
     {
@@ -149,6 +167,13 @@ public class PlayerController : MonoBehaviour
         lantern = lantern != null ? lantern : GetComponentInChildren<LightLantern>();
         health = GetComponent<PlayerHealth>();
         animator = animator != null ? animator : GetComponentInChildren<Animator>();
+        if (animator != null)
+        {
+            animator.cullingMode = AnimatorCullingMode.AlwaysAnimate;
+            animator.updateMode = AnimatorUpdateMode.Normal;
+            animator.applyRootMotion = false;
+            animator.speed = 1f;
+        }
         grappleJoint = GetComponent<DistanceJoint2D>();
         if (grappleJoint == null)
             grappleJoint = gameObject.AddComponent<DistanceJoint2D>();
@@ -162,6 +187,7 @@ public class PlayerController : MonoBehaviour
 
         rb.collisionDetectionMode = CollisionDetectionMode2D.Continuous;
         rb.interpolation = RigidbodyInterpolation2D.Interpolate;
+        groundCheckRadius = Mathf.Max(groundCheckRadius, 0.12f);
 
         if (capsuleCollider != null)
         {
@@ -340,7 +366,7 @@ public class PlayerController : MonoBehaviour
     {
         if (value.isPressed)
         {
-            ToggleLantern();
+            ToggleLanternOncePerFrame();
         }
     }
 
@@ -360,7 +386,7 @@ public class PlayerController : MonoBehaviour
             horizontal -= 1f;
         if (Keyboard.current.dKey.isPressed || Keyboard.current.rightArrowKey.isPressed)
             horizontal += 1f;
-        if (Keyboard.current.upArrowKey.isPressed)
+        if (Keyboard.current.upArrowKey.isPressed || Keyboard.current.wKey.isPressed)
             vertical += 1f;
         if (Keyboard.current.downArrowKey.isPressed)
             vertical -= 1f;
@@ -372,7 +398,8 @@ public class PlayerController : MonoBehaviour
         {
             if (isGrappling)
                 DetachFromGrappleByJump();
-            jumpBufferCounter = jumpBufferTime;
+            else
+                jumpBufferCounter = jumpBufferTime;
         }
 
         if ((Keyboard.current.spaceKey.wasReleasedThisFrame || Keyboard.current.upArrowKey.wasReleasedThisFrame) && rb.linearVelocity.y > 0f)
@@ -399,7 +426,8 @@ public class PlayerController : MonoBehaviour
         if (grappleReleased || (Mouse.current != null && Mouse.current.rightButton.wasReleasedThisFrame))
             grappleHeld = false;
 
-        // Lantern is bound to F on PlayerInput (Lantern action). Do not toggle F here — it would double-toggle with OnLantern().
+        if (Keyboard.current.fKey.wasPressedThisFrame || (Mouse.current != null && Mouse.current.leftButton.wasPressedThisFrame))
+            ToggleLanternOncePerFrame();
 
         isGlideHeld = Keyboard.current.spaceKey.isPressed || Keyboard.current.rightShiftKey.isPressed;
     }
@@ -407,7 +435,15 @@ public class PlayerController : MonoBehaviour
     void UpdateGroundedState()
     {
         bool wasGrounded = isGrounded;
-        isGrounded = groundCheck != null && Physics2D.OverlapCircle(groundCheck.position, groundCheckRadius, groundLayer);
+        float checkRadius = Mathf.Max(groundCheckRadius, 0.12f);
+        isGrounded = groundCheck != null && Physics2D.OverlapCircle(groundCheck.position, checkRadius, groundLayer);
+        if (!isGrounded && capsuleCollider != null)
+        {
+            Bounds bounds = capsuleCollider.bounds;
+            Vector2 origin = new Vector2(bounds.center.x, bounds.min.y + 0.02f);
+            Vector2 size = new Vector2(Mathf.Max(0.08f, bounds.size.x * 0.78f), 0.08f);
+            isGrounded = Physics2D.OverlapBox(origin, size, 0f, groundLayer) != null;
+        }
 
         if (!wasGrounded && isGrounded)
         {
@@ -867,17 +903,57 @@ public class PlayerController : MonoBehaviour
             lantern.ToggleLantern();
     }
 
+    void ToggleLanternOncePerFrame()
+    {
+        if (lastLanternToggleFrame == Time.frameCount)
+            return;
+
+        lastLanternToggleFrame = Time.frameCount;
+        ToggleLantern();
+    }
+
     void UpdateAnimatorState()
     {
         if (animator == null)
             return;
 
+        animator.speed = 1f;
+
+        if (isGrounded)
+            animatorUngroundedTime = 0f;
+        else
+            animatorUngroundedTime += Time.deltaTime;
+
+        float horizontalSpeed = Mathf.Abs(rb.linearVelocity.x);
+        float inputAmount = Mathf.Abs(moveInput.x);
+        float verticalSpeed = rb.linearVelocity.y;
+        bool animationGrounded = isGrounded || animatorUngroundedTime <= animationGroundedGraceTime;
+        bool specialMovement = isSliding || isDashing || isWallSliding || isGrappling;
+        bool runAllowed = !specialMovement && (!runAnimationRequiresGrounded || animationGrounded);
+
+        if (!runAllowed)
+        {
+            animatorRunState = false;
+        }
+        else if (animatorRunState)
+        {
+            animatorRunState = inputAmount > 0.05f || horizontalSpeed > animationRunStopSpeed;
+        }
+        else
+        {
+            animatorRunState = inputAmount > 0.05f || horizontalSpeed > animationRunStartSpeed;
+        }
+
+        bool airborneAnimation = !animationGrounded && !isDashing && !isSliding && !isGrappling;
+        bool jumpingAnimation = airborneAnimation && verticalSpeed > animationVerticalDeadzone;
+        bool fallingAnimation = airborneAnimation && verticalSpeed < -animationVerticalDeadzone;
+
         if (AnimatorHasParameter("moveX"))
-            animator.SetFloat("moveX", Mathf.Abs(moveInput.x));
+            animator.SetFloat("moveX", inputAmount, animationInputDampTime, Time.deltaTime);
         if (AnimatorHasParameter("velocityY"))
-            animator.SetFloat("velocityY", rb.linearVelocity.y);
+            animator.SetFloat("velocityY", verticalSpeed, animationSpeedDampTime, Time.deltaTime);
         if (AnimatorHasParameter("isGrounded"))
-            animator.SetBool("isGrounded", isGrounded);
+            animator.SetBool("isGrounded", animationGrounded);
         if (AnimatorHasParameter("isSliding"))
             animator.SetBool("isSliding", isSliding);
         if (AnimatorHasParameter("isDashing"))
@@ -889,16 +965,18 @@ public class PlayerController : MonoBehaviour
         if (AnimatorHasParameter("isGrappling"))
             animator.SetBool("isGrappling", isGrappling);
 
-        float speed = Mathf.Abs(rb.linearVelocity.x);
-        float vy = rb.linearVelocity.y;
         if (AnimatorHasParameter("Speed"))
-            animator.SetFloat("Speed", speed);
+            animator.SetFloat("Speed", horizontalSpeed, animationSpeedDampTime, Time.deltaTime);
         if (AnimatorHasParameter("KaelRun"))
-            animator.SetBool("KaelRun", isGrounded && Mathf.Abs(moveInput.x) > 0.05f);
+            animator.SetBool("KaelRun", animatorRunState);
+        if (AnimatorHasParameter("IsMoving"))
+            animator.SetBool("IsMoving", animatorRunState);
+        if (AnimatorHasParameter("IsRunning"))
+            animator.SetBool("IsRunning", animatorRunState);
         if (AnimatorHasParameter("Is Jumping"))
-            animator.SetBool("Is Jumping", !isGrounded && vy >= -0.15f);
+            animator.SetBool("Is Jumping", jumpingAnimation);
         if (AnimatorHasParameter("Is Falling"))
-            animator.SetBool("Is Falling", !isGrounded && vy < -0.15f);
+            animator.SetBool("Is Falling", fallingAnimation);
         if (AnimatorHasParameter("Trigger"))
             animator.SetBool("Trigger", isDashing);
     }

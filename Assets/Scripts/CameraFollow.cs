@@ -9,6 +9,9 @@ public class CameraFollow : MonoBehaviour
     public Transform target;
     public float smoothSpeed = 5f;
     public Vector2 offset = new Vector2(0f, 1f);
+    public float maxFollowSpeed = 40f;
+
+    Vector3 velocity;
 
     void LateUpdate()
     {
@@ -21,6 +24,7 @@ public class CameraFollow : MonoBehaviour
             transform.position.z
         );
 
-        transform.position = Vector3.Lerp(transform.position, desired, smoothSpeed * Time.deltaTime);
+        float smoothTime = smoothSpeed <= 0f ? 0f : 1f / smoothSpeed;
+        transform.position = Vector3.SmoothDamp(transform.position, desired, ref velocity, smoothTime, maxFollowSpeed, Time.deltaTime);
     }
 }
