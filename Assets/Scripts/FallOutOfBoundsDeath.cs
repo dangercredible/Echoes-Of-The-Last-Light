@@ -17,7 +17,8 @@ public class FallOutOfBoundsDeath : MonoBehaviour
     void Awake()
     {
         health = GetComponent<PlayerHealth>();
-        winPanel.SetActive(false);
+        if (winPanel != null)
+            winPanel.SetActive(false);
     }
 
     void Update()
@@ -33,4 +34,3 @@ public class FallOutOfBoundsDeath : MonoBehaviour
         //Time.timeScale = 0f;
     }
 }
-

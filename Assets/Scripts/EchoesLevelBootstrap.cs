@@ -70,7 +70,7 @@ public class EchoesLevelBootstrap : MonoBehaviour
     public float introGrappleFreeWorldUnits = 42f;
 
     [Header("World tutorial prompts")]
-    public bool spawnWorldTutorialPrompts = true;
+    public bool spawnWorldTutorialPrompts = false;
 
     [Header("Light bridges (generated platforms)")]
     [Tooltip("Indices i for Platform_i that become LightActivatedPlatform bridges (copy style from Platform_LightBridge_A).")]
@@ -93,9 +93,13 @@ public class EchoesLevelBootstrap : MonoBehaviour
         if (!gameObject.scene.IsValid())
             return;
 
+        spawnWorldTutorialPrompts = false;
+        WorldTutorialPrompt.PromptsEnabled = false;
+
         EnsureRoundCompleteControllerExists();
         TryBuildLayout();
 
+        DisableWorldTutorialPrompts();
         EnsureWorldTutorialPromptsIfMissing();
 
         EnsureEchoesSceneAtmosphere();
@@ -593,6 +597,15 @@ public class EchoesLevelBootstrap : MonoBehaviour
 
         float half = groundTotalWidth * 0.5f;
         SpawnWorldTutorialPrompts(half, groundY);
+    }
+
+    void DisableWorldTutorialPrompts()
+    {
+        if (spawnWorldTutorialPrompts)
+            return;
+
+        foreach (WorldTutorialPrompt prompt in Object.FindObjectsByType<WorldTutorialPrompt>(FindObjectsInactive.Include, FindObjectsSortMode.None))
+            prompt.gameObject.SetActive(false);
     }
 
     void SpawnWorldTutorialPrompts(float halfWidth, float groundY)
