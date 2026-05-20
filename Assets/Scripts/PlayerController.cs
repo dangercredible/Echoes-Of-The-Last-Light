@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -9,6 +10,12 @@ public class PlayerController : MonoBehaviour
 {
     [Header("Movement")]
     public float moveSpeed = 8f;
+    [Tooltip("How quickly horizontal speed reaches target while grounded.")]
+    public float groundAcceleration = 70f;
+    [Tooltip("How quickly horizontal speed reaches target while airborne.")]
+    public float airAcceleration = 38f;
+    [Tooltip("How quickly horizontal speed decays to zero when no input is held.")]
+    public float horizontalDeceleration = 60f;
     public float jumpForce = 18f;
 
     [Header("Double Jump")]
@@ -130,9 +137,12 @@ public class PlayerController : MonoBehaviour
     private DistanceJoint2D grappleJoint;
     private PlayerHealth health;
     private float airbornePeakY;
+    private HashSet<string> animatorParameterCache;
 
     void Awake()
     {
+        DisableLegacyMovementScripts();
+
         rb = GetComponent<Rigidbody2D>();
         capsuleCollider = GetComponent<CapsuleCollider2D>();
         baseGravityScale = rb.gravityScale;
@@ -167,7 +177,33 @@ public class PlayerController : MonoBehaviour
         airbornePeakY = transform.position.y;
 
         EchoesAudioDirector.EnsureExists();
+        CacheAnimatorParameterNames();
     }
+
+    void DisableLegacyMovementScripts()
+    {
+        // Prevent old movement scripts from fighting physics-based PlayerController.
+        PlayerController2 legacyController2 = GetComponent<PlayerController2>();
+        if (legacyController2 != null && legacyController2.enabled)
+            legacyController2.enabled = false;
+
+        PlayerMovementControl legacyMovement = GetComponent<PlayerMovementControl>();
+        if (legacyMovement != null && legacyMovement.enabled)
+            legacyMovement.enabled = false;
+    }
+
+    void CacheAnimatorParameterNames()
+    {
+        animatorParameterCache = null;
+        if (animator == null || animator.runtimeAnimatorController == null)
+            return;
+        animatorParameterCache = new HashSet<string>();
+        foreach (AnimatorControllerParameter p in animator.parameters)
+            animatorParameterCache.Add(p.name);
+    }
+
+    bool AnimatorHasParameter(string parameterName) =>
+        animatorParameterCache != null && animatorParameterCache.Contains(parameterName);
 
     void Update()
     {
@@ -220,7 +256,18 @@ public class PlayerController : MonoBehaviour
             return;
         }
 
-        float horizontal = wallJumpMoveLockTimer > 0f ? 0f : moveInput.x * moveSpeed;
+        float targetHorizontal = wallJumpMoveLockTimer > 0f ? 0f : moveInput.x * moveSpeed;
+        float accel = isGrounded ? groundAcceleration : airAcceleration;
+        float horizontal = rb.linearVelocity.x;
+        if (Mathf.Abs(targetHorizontal) > 0.01f)
+        {
+            horizontal = Mathf.MoveTowards(horizontal, targetHorizontal, accel * Time.fixedDeltaTime);
+        }
+        else
+        {
+            horizontal = Mathf.MoveTowards(horizontal, 0f, horizontalDeceleration * Time.fixedDeltaTime);
+        }
+
         float vertical = rb.linearVelocity.y;
         if (isWallSliding)
         {
@@ -299,7 +346,8 @@ public class PlayerController : MonoBehaviour
 
     void ApplyKeyboardFallbackInput()
     {
-        // Keyboard fallback keeps controls working even if Input Actions are missing/misconfigured.
+        // Keyboard fallback keeps controls working if Input Actions are missing/misconfigured,
+        // while still allowing action-based movement on PC when keyboard movement isn't pressed.
         if (Keyboard.current == null)
         {
             moveInput = moveInputFromActions;
@@ -316,7 +364,9 @@ public class PlayerController : MonoBehaviour
             vertical += 1f;
         if (Keyboard.current.downArrowKey.isPressed)
             vertical -= 1f;
-        moveInput = new Vector2(horizontal, vertical);
+        Vector2 keyboardMove = new Vector2(horizontal, vertical);
+        bool usingKeyboardMove = Mathf.Abs(keyboardMove.x) > 0.01f || Mathf.Abs(keyboardMove.y) > 0.01f;
+        moveInput = usingKeyboardMove ? keyboardMove : moveInputFromActions;
 
         if (Keyboard.current.spaceKey.wasPressedThisFrame || Keyboard.current.upArrowKey.wasPressedThisFrame)
         {
@@ -822,14 +872,35 @@ public class PlayerController : MonoBehaviour
         if (animator == null)
             return;
 
-        animator.SetFloat("moveX", Mathf.Abs(moveInput.x));
-        animator.SetFloat("velocityY", rb.linearVelocity.y);
-        animator.SetBool("isGrounded", isGrounded);
-        animator.SetBool("isSliding", isSliding);
-        animator.SetBool("isDashing", isDashing);
-        animator.SetBool("isGliding", isGliding);
-        animator.SetBool("isWallSliding", isWallSliding);
-        animator.SetBool("isGrappling", isGrappling);
+        if (AnimatorHasParameter("moveX"))
+            animator.SetFloat("moveX", Mathf.Abs(moveInput.x));
+        if (AnimatorHasParameter("velocityY"))
+            animator.SetFloat("velocityY", rb.linearVelocity.y);
+        if (AnimatorHasParameter("isGrounded"))
+            animator.SetBool("isGrounded", isGrounded);
+        if (AnimatorHasParameter("isSliding"))
+            animator.SetBool("isSliding", isSliding);
+        if (AnimatorHasParameter("isDashing"))
+            animator.SetBool("isDashing", isDashing);
+        if (AnimatorHasParameter("isGliding"))
+            animator.SetBool("isGliding", isGliding);
+        if (AnimatorHasParameter("isWallSliding"))
+            animator.SetBool("isWallSliding", isWallSliding);
+        if (AnimatorHasParameter("isGrappling"))
+            animator.SetBool("isGrappling", isGrappling);
+
+        float speed = Mathf.Abs(rb.linearVelocity.x);
+        float vy = rb.linearVelocity.y;
+        if (AnimatorHasParameter("Speed"))
+            animator.SetFloat("Speed", speed);
+        if (AnimatorHasParameter("KaelRun"))
+            animator.SetBool("KaelRun", isGrounded && Mathf.Abs(moveInput.x) > 0.05f);
+        if (AnimatorHasParameter("Is Jumping"))
+            animator.SetBool("Is Jumping", !isGrounded && vy >= -0.15f);
+        if (AnimatorHasParameter("Is Falling"))
+            animator.SetBool("Is Falling", !isGrounded && vy < -0.15f);
+        if (AnimatorHasParameter("Trigger"))
+            animator.SetBool("Trigger", isDashing);
     }
 
     void FlipSprite()

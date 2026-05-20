@@ -55,6 +55,9 @@ public class EchoesLevelBootstrap : MonoBehaviour
     [Tooltip("Player transform Y so feet sit on the main floor (ground center Y + this).")]
     public float playerSpawnYOffsetFromGround = 1.12f;
 
+    [Tooltip("Extra lift applied after snapping the player to the top of the generated ground collider.")]
+    public float playerSpawnExtraLift = 0.03f;
+
     [Header("Intro difficulty")]
     [Tooltip("First N procedural platforms use gentler vertical variation.")]
     public int introEasyPlatformColumns = 14;
@@ -205,8 +208,7 @@ public class EchoesLevelBootstrap : MonoBehaviour
         if (movePlayerToFarLeftOnBuild && playerObject != null)
         {
             float spawnX = worldLeft + spawnInsetFromLeftEdge;
-            float spawnY = groundY + playerSpawnYOffsetFromGround;
-            playerObject.transform.position = new Vector3(spawnX, spawnY, 0f);
+            PositionPlayerOnGeneratedGround(playerObject, spawnX);
         }
 
         CreatePitKillZone(pitMin, pitMax);
@@ -249,6 +251,27 @@ public class EchoesLevelBootstrap : MonoBehaviour
         else
 #endif
             Destroy(target);
+    }
+
+    void PositionPlayerOnGeneratedGround(GameObject playerObject, float spawnX)
+    {
+        float spawnY = groundY + playerSpawnYOffsetFromGround;
+        float playerHalfHeight = 0.55f;
+
+        Collider2D playerCollider = playerObject.GetComponent<Collider2D>();
+        if (playerCollider != null)
+            playerHalfHeight = Mathf.Max(0.1f, playerCollider.bounds.extents.y);
+
+        GameObject leftGround = GameObject.Find("Ground_Left");
+        if (leftGround != null)
+        {
+            Collider2D leftGroundCollider = leftGround.GetComponent<Collider2D>();
+            if (leftGroundCollider != null)
+                spawnY = leftGroundCollider.bounds.max.y + playerHalfHeight + playerSpawnExtraLift;
+        }
+
+        Vector3 current = playerObject.transform.position;
+        playerObject.transform.position = new Vector3(spawnX, spawnY, current.z);
     }
 
     GameObject CreateGroundChunk(string chunkName, Sprite sprite, Vector3 position, Vector3 scale, int layer)
@@ -584,16 +607,16 @@ public class EchoesLevelBootstrap : MonoBehaviour
         int serial = 0;
         float wl = -halfWidth;
 
-        CreateWorldTutorialPrompt(ref serial, new Vector3(wl + 11f, groundY + 2.65f, 0f), new Vector2(9f, 5f),
+        CreateWorldTutorialPrompt(ref serial, new Vector3(wl + 8f, groundY + 2.9f, 0f), new Vector2(9f, 5f),
             "Walk with A / D or the Arrow Keys.\nJump with Space or Up Arrow.");
 
-        CreateWorldTutorialPrompt(ref serial, new Vector3(wl + 28f, groundY + 3.1f, 0f), new Vector2(10f, 5.5f),
+        CreateWorldTutorialPrompt(ref serial, new Vector3(wl + 16.5f, groundY + 3.1f, 0f), new Vector2(10f, 5.5f),
             "Dash with Shift.\nSlide with Ctrl, C, or S.\nHold Space while falling to glide.");
 
-        CreateWorldTutorialPrompt(ref serial, new Vector3(pitCenterX - 24f, groundY + 3.6f, 0f), new Vector2(11f, 6f),
+        CreateWorldTutorialPrompt(ref serial, new Vector3(wl + 25f, groundY + 3.25f, 0f), new Vector2(11f, 6f),
             "Press F to raise your light.\nLight reveals bridges and wakes grapple points.");
 
-        CreateWorldTutorialPrompt(ref serial, new Vector3(pitCenterX - 9f, groundY + 5.2f, 0f), new Vector2(11f, 6.5f),
+        CreateWorldTutorialPrompt(ref serial, new Vector3(wl + 34f, groundY + 3.45f, 0f), new Vector2(11f, 6.5f),
             "With your light on, press E, Q, or Right Mouse near a lit anchor to grapple.");
     }
 
