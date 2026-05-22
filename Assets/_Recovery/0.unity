@@ -577,12 +577,12 @@ SpriteRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_MaskInteraction: 0
-  m_Sprite: {fileID: 7482667652216324306, guid: 311925a002f4447b3a28927169b83ea6, type: 3}
+  m_Sprite: {fileID: 3283186071982047432, guid: 15cbb332f72b1b3488564ce1795190dd, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
   m_DrawMode: 0
-  m_Size: {x: 1, y: 1}
+  m_Size: {x: 0.85, y: 0.82}
   m_AdaptiveModeThreshold: 0.5
   m_SpriteTileMode: 0
   m_WasSpriteAssigned: 1
@@ -596,8 +596,8 @@ Transform:
   m_GameObject: {fileID: 726960817}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 0.8, y: 1.2, z: 1}
+  m_LocalPosition: {x: -4.2, y: 0.46, z: 0}
+  m_LocalScale: {x: 2.7847583, y: 3.804216, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 89291190}
@@ -669,6 +669,9 @@ MonoBehaviour:
   wallJumpMoveLockTime: 0.15
   wallCoyoteTime: 0.12
   wallStickTime: 0.15
+  wallJumpMaxRisingSpeed: 0.65
+  wallSlideRequiresHoldTowardWall: 1
+  wallPushHoldDeadzone: 0.12
   grappleRange: 10
   grappleMinRopeLength: 1.5
   grappleMaxRopeLength: 12
@@ -676,6 +679,7 @@ MonoBehaviour:
   grappleSwingAirControl: 20
   grappleCooldown: 0.25
   requireIlluminatedGrapplePoints: 0
+  requireLightElementForGrapple: 1
   grappleBlockerLayer:
     serializedVersion: 2
     m_Bits: 320
@@ -687,6 +691,9 @@ MonoBehaviour:
   grappleDetachInertiaMultiplier: 1.12
   grappleDetachMinHorizontalSpeed: 4.5
   lantern: {fileID: 726960824}
+  enableFallDamage: 1
+  fallDamageSafeDistance: 8
+  fallDamageAmount: 1
   animator: {fileID: 0}
   groundCheck: {fileID: 89291190}
   groundCheckRadius: 0.15
@@ -752,6 +759,9 @@ MonoBehaviour:
   pulseAmount: 0.08
   resetDarknessOnCatch: 1
   catchResetDelay: 0.15
+  delayBeforeSpreadSeconds: 40
+  minForwardTravelBeforeSpread: 24
+  holdDarknessBehindPlayerWhileWaiting: 30
 --- !u!1 &910000001
 GameObject:
   m_ObjectHideFlags: 0
