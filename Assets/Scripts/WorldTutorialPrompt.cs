@@ -8,7 +8,9 @@ using UnityEngine.UI;
 /// </summary>
 public class WorldTutorialPrompt : MonoBehaviour
 {
-    [TextArea(2, 6)]
+    public static bool PromptsEnabled = false;
+
+    [TextArea(8, 24)]
     public string messageText = "";
 
     [Tooltip("Collider size if none exists — assigned on Start.")]
@@ -20,7 +22,7 @@ public class WorldTutorialPrompt : MonoBehaviour
 
     [Header("Label layout")]
     [Tooltip("Stack letters vertically (one character per line).")]
-    public bool verticalCharacters = true;
+    public bool verticalCharacters = false;
 
     [Range(14f, 56f)]
     public float fontSize = 28f;
@@ -31,8 +33,17 @@ public class WorldTutorialPrompt : MonoBehaviour
     Canvas promptCanvas;
     TextMeshProUGUI label;
 
+    void Awake()
+    {
+        if (!PromptsEnabled)
+            gameObject.SetActive(false);
+    }
+
     void Start()
     {
+        if (!PromptsEnabled)
+            return;
+
         BoxCollider2D box = GetComponent<BoxCollider2D>();
         if (box == null)
         {

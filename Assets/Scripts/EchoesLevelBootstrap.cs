@@ -70,7 +70,7 @@ public class EchoesLevelBootstrap : MonoBehaviour
     public float introGrappleFreeWorldUnits = 42f;
 
     [Header("World tutorial prompts")]
-    public bool spawnWorldTutorialPrompts = true;
+    public bool spawnWorldTutorialPrompts = false;
 
     [Header("Light bridges (generated platforms)")]
     [Tooltip("Indices i for Platform_i that become LightActivatedPlatform bridges (copy style from Platform_LightBridge_A).")]
@@ -93,9 +93,13 @@ public class EchoesLevelBootstrap : MonoBehaviour
         if (!gameObject.scene.IsValid())
             return;
 
+        spawnWorldTutorialPrompts = false;
+        WorldTutorialPrompt.PromptsEnabled = false;
+
         EnsureRoundCompleteControllerExists();
         TryBuildLayout();
 
+        DisableWorldTutorialPrompts();
         EnsureWorldTutorialPromptsIfMissing();
 
         EnsureEchoesSceneAtmosphere();
@@ -595,6 +599,15 @@ public class EchoesLevelBootstrap : MonoBehaviour
         SpawnWorldTutorialPrompts(half, groundY);
     }
 
+    void DisableWorldTutorialPrompts()
+    {
+        if (spawnWorldTutorialPrompts)
+            return;
+
+        foreach (WorldTutorialPrompt prompt in Object.FindObjectsByType<WorldTutorialPrompt>(FindObjectsInactive.Include, FindObjectsSortMode.None))
+            prompt.gameObject.SetActive(false);
+    }
+
     void SpawnWorldTutorialPrompts(float halfWidth, float groundY)
     {
 #if UNITY_EDITOR
@@ -607,16 +620,16 @@ public class EchoesLevelBootstrap : MonoBehaviour
         int serial = 0;
         float wl = -halfWidth;
 
-        CreateWorldTutorialPrompt(ref serial, new Vector3(wl + 11f, groundY + 2.65f, 0f), new Vector2(9f, 5f),
+        CreateWorldTutorialPrompt(ref serial, new Vector3(wl + 8f, groundY + 2.9f, 0f), new Vector2(9f, 5f),
             "Walk with A / D or the Arrow Keys.\nJump with Space or Up Arrow.");
 
-        CreateWorldTutorialPrompt(ref serial, new Vector3(wl + 28f, groundY + 3.1f, 0f), new Vector2(10f, 5.5f),
+        CreateWorldTutorialPrompt(ref serial, new Vector3(wl + 16.5f, groundY + 3.1f, 0f), new Vector2(10f, 5.5f),
             "Dash with Shift.\nSlide with Ctrl, C, or S.\nHold Space while falling to glide.");
 
-        CreateWorldTutorialPrompt(ref serial, new Vector3(pitCenterX - 24f, groundY + 3.6f, 0f), new Vector2(11f, 6f),
+        CreateWorldTutorialPrompt(ref serial, new Vector3(wl + 25f, groundY + 3.25f, 0f), new Vector2(11f, 6f),
             "Press F to raise your light.\nLight reveals bridges and wakes grapple points.");
 
-        CreateWorldTutorialPrompt(ref serial, new Vector3(pitCenterX - 9f, groundY + 5.2f, 0f), new Vector2(11f, 6.5f),
+        CreateWorldTutorialPrompt(ref serial, new Vector3(wl + 34f, groundY + 3.45f, 0f), new Vector2(11f, 6.5f),
             "With your light on, press E, Q, or Right Mouse near a lit anchor to grapple.");
     }
 
