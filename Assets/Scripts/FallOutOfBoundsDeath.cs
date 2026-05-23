@@ -27,7 +27,13 @@ public class FallOutOfBoundsDeath : MonoBehaviour
 
         // Out-of-bounds fail-safe for any gaps not covered by explicit trigger volumes.
         if (transform.position.y < killY)
+        {
+            if (deathMessage == null || deathMessage.Trim() == "")
+            {
+                deathMessage = "You fell into the abyss.";
+            }
             health.Kill(deathMessage);
+        }
 
         // Win condition: if the player reaches the end of the level, show the win panel.
         //Time.timeScale = 0f;
