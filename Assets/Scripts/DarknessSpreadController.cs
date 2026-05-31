@@ -9,7 +9,8 @@ public class DarknessSpreadController : MonoBehaviour
     [Header("References")]
     public Transform player;
     public PlayerController playerController;
-    public LightLantern lantern;
+    public PlayerHealth playerHealth;
+
     public Transform respawnPoint;
     public SpriteRenderer darknessVisual;
 
@@ -62,9 +63,7 @@ public class DarknessSpreadController : MonoBehaviour
         if (playerController == null && player != null)
             playerController = player.GetComponent<PlayerController>();
 
-        if (lantern == null && player != null)
-            lantern = player.GetComponent<LightLantern>();
-
+       
         if (respawnPoint == null && player != null)
             playerStartPosition = player.position;
         else if (respawnPoint != null)
@@ -101,7 +100,7 @@ public class DarknessSpreadController : MonoBehaviour
         if (catchCooldown > 0f)
             catchCooldown -= Time.deltaTime;
 
-        bool lanternOn = lantern != null && lantern.IsOn;
+       
 
         if (!spreadUnlocked)
         {
@@ -115,15 +114,11 @@ public class DarknessSpreadController : MonoBehaviour
         {
             float holdLine = player.position.x - holdDarknessBehindPlayerWhileWaiting;
             darknessFrontX = Mathf.Min(darknessFrontX, holdLine);
-            UpdateDarknessVisual(lanternOn);
+           
             return;
         }
 
-        float speedMultiplier = lanternOn ? lanternSlowMultiplier : 1f;
-        darknessFrontX += baseSpreadSpeed * speedMultiplier * Time.deltaTime;
-
-        UpdateDarknessVisual(lanternOn);
-
+              
         if (catchCooldown <= 0f && player.position.x <= darknessFrontX + catchBuffer)
             HandlePlayerCaught();
     }
@@ -138,11 +133,10 @@ public class DarknessSpreadController : MonoBehaviour
             PlayerHealth health = playerController.GetComponent<PlayerHealth>();
             if (health != null)
             {
-                health.Kill("The darkness caught you.");
-                return;
+                
             }
             else
-                playerController.Die();
+                playerHealth.Die();
         }
 
         player.position = respawnPoint != null ? respawnPoint.position : playerStartPosition;

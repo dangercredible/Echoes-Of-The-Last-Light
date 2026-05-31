@@ -173,6 +173,28 @@
                 },
                 {
                     "name": "",
+                    "id": "f4f53961-d14d-4872-9e17-125e9ca7c29b",
+                    "path": "",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Move",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "8d788696-5aca-4c2d-a6ce-1bc78fbbf67b",
+                    "path": "",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Move",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
                     "id": "02660a37-e019-4211-b20e-9fb7846999c4",
                     "path": "<Keyboard>/space",
                     "interactions": "",
@@ -436,6 +458,34 @@
                     "processors": "",
                     "groups": "",
                     "action": "Run",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                }
+            ]
+        },
+        {
+            "name": "New action map1",
+            "id": "9a25c81b-2e1d-41e1-a8c3-3e45b15c99fb",
+            "actions": [
+                {
+                    "name": "New action",
+                    "type": "Value",
+                    "id": "1984215f-a6ef-4837-88b1-7fdf2c57c0b2",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": true
+                }
+            ],
+            "bindings": [
+                {
+                    "name": "",
+                    "id": "3b90291d-cca0-4838-8e18-63fb71837d9b",
+                    "path": "",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "New action",
                     "isComposite": false,
                     "isPartOfComposite": false
                 }

@@ -5,48 +5,29 @@ using UnityEngine;
 /// </summary>
 public class PlayerHealth : MonoBehaviour
 {
-    public int maxHealth = 3;
-    public int CurrentHealth { get; private set; }
-    public bool IsDead { get; private set; }
-
-    void Awake()
+    public int health = 5;
+    public GameObject DiePanel;
+    public void Start()
     {
-        maxHealth = Mathf.Max(1, maxHealth);
-        ResetHealth();
+          DiePanel.SetActive(false);
+    }
+    public void TakeDamage(int damage)
+    {
+        health -= damage;
+        if (health <= 0)
+        {
+            Die();
+        }
+
     }
 
-    public void ResetHealth()
+    public void Die()
     {
-        IsDead = false;
-        CurrentHealth = maxHealth;
-    }
-
-    public void Damage(int amount, string reason = null)
-    {
-        if (IsDead)
-            return;
-
-        CurrentHealth = Mathf.Max(0, CurrentHealth - Mathf.Abs(amount));
-        if (CurrentHealth <= 0)
-            Kill(reason);
-    }
-
-    public void Kill(string reason = null)
-    {
-        if (IsDead)
-            return;
-
-        // Stop player motion first, then route to game-over UI/controller.
-        IsDead = true;
-        CurrentHealth = 0;
-
-        PlayerController controller = GetComponent<PlayerController>();
-        if (controller != null)
-            controller.Die();
-
-        GameOverController gameOver = GameOverController.InstanceOrFind();
-        if (gameOver != null)
-            gameOver.GameOver(reason ?? "You died.");
+        // Handle player death (e.g., play animation, disable controls, etc.)
+        Debug.Log("Player has died.");
+        // For now, just reset health for demonstration.
+        //health = 5;
+        DiePanel.SetActive(true);
     }
 }
 

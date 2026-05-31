@@ -1,11 +1,7 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
 
-/// <summary>
-/// Core player movement/combat traversal controller (run, jump, dash, slide, glide, grapple, lantern).
-/// Teaching is handled by world-space <see cref="WorldTutorialPrompt"/> triggers in the level.
-/// </summary>
-public class PlayerController : MonoBehaviour
+public class PlayerMovement : MonoBehaviour
 {
     public float moveSpeed = 5f;
     public float jumpForce = 7f;
